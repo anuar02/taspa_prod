@@ -17,42 +17,32 @@ export function PhotoCard({ photo }: { photo: Photo }) {
   const [pendingAction, setPendingAction] = useState<"like" | "save" | null>(null);
 
   async function handleLike() {
-    if (!user?._id || pendingAction) {
-      return;
-    }
-
+    if (!user?._id || pendingAction) return;
     const nextLiked = !liked;
     setPendingAction("like");
     setLiked(nextLiked);
-    setLikesCount((count) => count + (nextLiked ? 1 : -1));
-
+    setLikesCount((c) => c + (nextLiked ? 1 : -1));
     try {
       const { data } = await api.post(`/photos/${photo._id}/like`);
       setLiked(data.liked);
       setLikesCount(data.likesCount);
-    } catch (error) {
-      console.error(error);
+    } catch {
       setLiked(!nextLiked);
-      setLikesCount((count) => count + (nextLiked ? -1 : 1));
+      setLikesCount((c) => c + (nextLiked ? -1 : 1));
     } finally {
       setPendingAction(null);
     }
   }
 
   async function handleSave() {
-    if (!user?._id || pendingAction) {
-      return;
-    }
-
+    if (!user?._id || pendingAction) return;
     const nextSaved = !saved;
     setPendingAction("save");
     setSaved(nextSaved);
-
     try {
       const { data } = await api.post(`/photos/${photo._id}/save`);
       setSaved(data.saved);
-    } catch (error) {
-      console.error(error);
+    } catch {
       setSaved(!nextSaved);
     } finally {
       setPendingAction(null);
@@ -60,9 +50,9 @@ export function PhotoCard({ photo }: { photo: Photo }) {
   }
 
   return (
-    <article className="mb-4 break-inside-avoid overflow-hidden rounded-[28px] border border-white/60 bg-white shadow-card">
+    <article className="photo-card mb-3 break-inside-avoid overflow-hidden rounded-2xl bg-surface shadow-card">
       <Link href={`/photo/${photo._id}`} className="block">
-        <div className="relative aspect-[4/5] w-full bg-surface">
+        <div className="relative aspect-[4/5] w-full bg-bg">
           <Image
             src={photo.thumbnailUrl || photo.imageUrl}
             alt={photo.caption || photo.author.displayName}
@@ -72,48 +62,52 @@ export function PhotoCard({ photo }: { photo: Photo }) {
           />
         </div>
       </Link>
-      <div className="space-y-3 p-4">
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <p className="text-sm font-semibold text-text">{photo.author.displayName}</p>
-            <p className="text-xs text-muted">@{photo.author.username}</p>
+
+      <div className="space-y-2.5 p-3.5">
+        <div className="flex items-center justify-between gap-2">
+          <div className="min-w-0">
+            <p className="truncate text-sm font-semibold text-text">{photo.author.displayName}</p>
+            {photo.location ? (
+              <p className="flex items-center gap-1 truncate text-xs text-muted">
+                <MapPin size={10} />
+                {photo.location}
+              </p>
+            ) : (
+              <p className="truncate text-xs text-muted">@{photo.author.username}</p>
+            )}
           </div>
-          <span className="rounded-full bg-surface px-3 py-1 text-[11px] font-medium text-muted">
+          <span className="shrink-0 rounded-lg bg-bg px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-muted">
             {photo.category}
           </span>
         </div>
-        {photo.caption ? <p className="text-sm text-text">{photo.caption}</p> : null}
-        <div className="flex items-center justify-between text-xs text-muted">
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={handleLike}
-              disabled={pendingAction !== null}
-              className={`inline-flex items-center gap-1 rounded-full px-2 py-1 ${
-                liked ? "bg-primary/10 text-primary" : "hover:bg-surface"
-              }`}
-            >
-              <Heart size={14} className={liked ? "fill-current" : ""} />
-              {likesCount}
-            </button>
-            <button
-              type="button"
-              onClick={handleSave}
-              disabled={pendingAction !== null}
-              className={`inline-flex items-center gap-1 rounded-full px-2 py-1 ${
-                saved ? "bg-primary/10 text-primary" : "hover:bg-surface"
-              }`}
-            >
-              <Bookmark size={14} className={saved ? "fill-current" : ""} />
-              {saved ? "Сақталды" : "Сақтау"}
-            </button>
-          </div>
-          {photo.location ? (
-            <span className="inline-flex items-center gap-1">
-              <MapPin size={14} />
-              {photo.location}
-            </span>
-          ) : null}
+
+        {photo.caption ? (
+          <p className="line-clamp-2 text-xs leading-relaxed text-muted">{photo.caption}</p>
+        ) : null}
+
+        <div className="flex items-center gap-1">
+          <button
+            type="button"
+            onClick={handleLike}
+            disabled={pendingAction !== null}
+            className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition ${
+              liked ? "bg-primary/10 text-primary" : "text-muted hover:bg-bg"
+            }`}
+          >
+            <Heart size={13} className={liked ? "fill-current" : ""} />
+            {likesCount}
+          </button>
+          <button
+            type="button"
+            onClick={handleSave}
+            disabled={pendingAction !== null}
+            className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition ${
+              saved ? "bg-primary/10 text-primary" : "text-muted hover:bg-bg"
+            }`}
+          >
+            <Bookmark size={13} className={saved ? "fill-current" : ""} />
+            {saved ? "Сақталды" : "Сақтау"}
+          </button>
         </div>
       </div>
     </article>

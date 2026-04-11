@@ -25,15 +25,17 @@ export function SideNav() {
   );
 
   return (
-    <aside className="fixed left-0 top-0 hidden h-full w-56 flex-col border-r border-border bg-white px-3 py-6 lg:flex">
+    <aside className="fixed left-0 top-0 hidden h-full w-56 flex-col border-r border-border bg-surface lg:flex">
       {/* Logo */}
-      <div className="mb-8 px-3">
-        <p className="text-xs font-bold uppercase tracking-[0.3em] text-primary">Taspa</p>
-        <p className="mt-1 text-xs text-muted">Әр сурет — бір тарих</p>
+      <div className="px-6 py-7">
+        <Link href="/splash">
+          <p className="text-xs font-bold uppercase tracking-[0.3em] text-primary">Taspa</p>
+          <p className="mt-0.5 text-[11px] text-muted">Әр сурет — бір тарих</p>
+        </Link>
       </div>
 
-      {/* Nav items */}
-      <nav className="flex flex-col gap-1">
+      {/* Nav */}
+      <nav className="flex flex-col px-3">
         {navItems.map(({ href, label, icon: Icon }) => {
           const active = pathname.startsWith(href);
           return (
@@ -41,30 +43,33 @@ export function SideNav() {
               key={href}
               href={href}
               className={clsx(
-                "flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition-colors",
+                "relative flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition-colors",
                 active
-                  ? "bg-primary/10 text-primary"
-                  : "text-muted hover:bg-surface hover:text-text"
+                  ? "bg-primary/8 text-primary"
+                  : "text-muted hover:bg-bg hover:text-text"
               )}
             >
-              <Icon size={20} />
+              {active && (
+                <span className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-full bg-primary" />
+              )}
+              <Icon size={18} strokeWidth={active ? 2.5 : 2} />
               {label}
             </Link>
           );
         })}
       </nav>
 
-      {/* User profile at bottom */}
+      {/* User */}
       {user && (
         <Link
           href={profileHref}
-          className="mt-auto flex items-center gap-3 rounded-xl px-3 py-3 hover:bg-surface"
+          className="mx-3 mt-auto mb-4 flex items-center gap-3 rounded-xl px-3 py-3 transition-colors hover:bg-bg"
         >
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/20 text-sm font-semibold text-primary">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-sm font-bold text-primary">
             {user.displayName?.[0]?.toUpperCase() ?? "U"}
           </div>
           <div className="min-w-0">
-            <p className="truncate text-sm font-medium text-text">{user.displayName}</p>
+            <p className="truncate text-sm font-semibold text-text">{user.displayName}</p>
             <p className="truncate text-xs text-muted">@{user.username}</p>
           </div>
         </Link>

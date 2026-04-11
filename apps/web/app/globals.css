@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -6,12 +8,16 @@
   color-scheme: light;
 }
 
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
 body {
-  min-height: 100vh;
-  background:
-    radial-gradient(circle at top, rgba(167, 139, 250, 0.35), transparent 35%),
-    linear-gradient(180deg, #fcfbff 0%, #f6f5ff 38%, #ffffff 100%);
-  color: #111827;
+  min-height: 100dvh;
+  background-color: #F8F7F4;
+  color: #1C1917;
+  font-family: "Outfit", system-ui, sans-serif;
 }
 
 * {
@@ -21,4 +27,31 @@ body {
 a {
   color: inherit;
   text-decoration: none;
+}
+
+/* Skeleton shimmer */
+@keyframes shimmer {
+  0% { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}
+
+.skeleton {
+  background: linear-gradient(90deg, #E7E5E4 25%, #F8F7F4 50%, #E7E5E4 75%);
+  background-size: 800px 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
+/* Card hover lift */
+.photo-card {
+  transition: transform 200ms ease-out, box-shadow 200ms ease-out;
+}
+
+.photo-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(28,25,23,0.14);
+}
+
+/* Active nav indicator */
+.nav-item-active {
+  border-left: 3px solid #5B21B6;
 }

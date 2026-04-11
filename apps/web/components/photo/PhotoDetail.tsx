@@ -44,16 +44,20 @@ export function PhotoDetail({ photo, aside }: { photo: Photo; aside?: React.Reac
   }
 
   return (
-    <section className="lg:flex lg:gap-8">
-      {/* Image */}
-      <div className="lg:flex-1">
-        <div className="relative aspect-[4/5] overflow-hidden rounded-[32px] bg-surface shadow-card">
-          <Image src={photo.imageUrl} alt={photo.caption || photo.author.displayName} fill className="object-cover" />
+    <section className="lg:grid lg:grid-cols-[minmax(0,1fr)_22rem] lg:gap-8 xl:grid-cols-[minmax(0,1fr)_24rem]">
+      <div className="min-w-0">
+        <div className="relative aspect-[4/5] overflow-hidden rounded-[32px] bg-surface shadow-card lg:h-[calc(100vh-7rem)] lg:max-h-[980px] lg:min-h-[640px] lg:aspect-auto">
+          <Image
+            src={photo.imageUrl}
+            alt={photo.caption || photo.author.displayName}
+            fill
+            className="object-contain"
+            sizes="(max-width: 1024px) 100vw, 70vw"
+          />
         </div>
       </div>
 
-      {/* Details panel */}
-      <div className="mt-5 space-y-5 lg:mt-0 lg:w-80 lg:shrink-0">
+      <div className="mt-5 min-w-0 space-y-5 lg:mt-0 lg:max-h-[calc(100vh-7rem)] lg:overflow-auto lg:pr-1">
         <div className="flex items-center justify-between">
           <Link href={`/profile/${photo.author.username}`}>
             <p className="text-lg font-semibold text-text hover:underline">{photo.author.displayName}</p>

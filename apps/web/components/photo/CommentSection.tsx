@@ -1,12 +1,67 @@
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
+import Link from "next/link";
+import { ArrowUp, MessageCircle } from "lucide-react";
 
 import { api } from "@/lib/api";
 import { Comment } from "@/lib/types";
 import { useAuthStore } from "@/store/authStore";
-import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
+
+// ─── helpers ────────────────────────────────────────────────────────────────
+
+const AVATAR_PALETTES = [
+  "bg-violet-100 text-violet-700",
+  "bg-amber-100 text-amber-700",
+  "bg-emerald-100 text-emerald-700",
+  "bg-sky-100 text-sky-700",
+  "bg-rose-100 text-rose-700",
+  "bg-orange-100 text-orange-700",
+];
+
+function avatarPalette(username: string) {
+  return AVATAR_PALETTES[username.charCodeAt(0) % AVATAR_PALETTES.length];
+}
+
+function timeAgo(dateStr: string) {
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const mins = Math.floor(diff / 60_000);
+  if (mins < 1) return "жаңа ғана";
+  if (mins < 60) return `${mins} мин`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `${hours} сағ`;
+  const days = Math.floor(hours / 24);
+  if (days < 7) return `${days} күн`;
+  return new Date(dateStr).toLocaleDateString("kk-KZ", { day: "numeric", month: "short" });
+}
+
+// ─── skeleton ───────────────────────────────────────────────────────────────
+
+function CommentSkeleton() {
+  return (
+    <div className="flex gap-3 py-3">
+      <div className="skeleton h-8 w-8 shrink-0 rounded-xl" />
+      <div className="flex-1 space-y-2 pt-0.5">
+        <div className="skeleton h-3 w-24 rounded-full" />
+        <div className="skeleton h-3 w-full rounded-full" />
+        <div className="skeleton h-3 w-3/4 rounded-full" />
+      </div>
+    </div>
+  );
+}
+
+// ─── avatar ─────────────────────────────────────────────────────────────────
+
+function Avatar({ name, username, size = "md" }: { name: string; username: string; size?: "sm" | "md" }) {
+  const dim = size === "sm" ? "h-7 w-7 text-xs" : "h-8 w-8 text-sm";
+  return (
+    <div className={`${dim} ${avatarPalette(username)} flex shrink-0 items-center justify-center rounded-xl font-bold`}>
+      {name[0]?.toUpperCase()}
+    </div>
+  );
+}
+
+// ─── main component ──────────────────────────────────────────────────────────
 
 export function CommentSection({ photoId, commentsCount }: { photoId: string; commentsCount: number }) {
   const user = useAuthStore((state) => state.user);
@@ -15,88 +70,148 @@ export function CommentSection({ photoId, commentsCount }: { photoId: string; co
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const inputRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
-    async function loadComments() {
+    async function load() {
       try {
         setLoading(true);
         setError("");
         const { data } = await api.get<{ items: Comment[] }>(`/comments/photo/${photoId}`, {
-          params: { page: 1, limit: 20 }
+          params: { page: 1, limit: 20 },
         });
         setComments(data.items);
-      } catch (loadError) {
-        console.error(loadError);
+      } catch {
         setError("Пікірлерді жүктеу мүмкін болмады");
       } finally {
         setLoading(false);
       }
     }
-
-    void loadComments();
+    void load();
   }, [photoId]);
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-
-    if (!text.trim()) {
-      return;
-    }
-
+  async function handleSubmit(e: FormEvent) {
+    e.preventDefault();
+    if (!text.trim() || submitting) return;
     try {
       setSubmitting(true);
       setError("");
       const { data } = await api.post<{ item: Comment }>(`/comments/photo/${photoId}`, {
-        text: text.trim()
+        text: text.trim(),
       });
-      setComments((current) => [data.item, ...current]);
+      setComments((prev) => [data.item, ...prev]);
       setText("");
-    } catch (submitError) {
-      console.error(submitError);
-      setError("Пікір жіберу сәтсіз аяқталды");
+      inputRef.current?.focus();
+    } catch {
+      setError("Пікір жіберілмеді");
     } finally {
       setSubmitting(false);
     }
   }
 
+  const count = comments.length || commentsCount;
+
   return (
-    <section className="rounded-[28px] bg-white p-5 shadow-card">
-      <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-text">Пікірлер</h2>
-        <span className="text-sm text-muted">{comments.length || commentsCount} пікір</span>
+    <div className="flex flex-col">
+      {/* header */}
+      <div className="mb-4 flex items-center gap-2">
+        <MessageCircle size={15} className="text-muted" />
+        <span className="text-sm font-semibold text-text">Пікірлер</span>
+        {count > 0 && (
+          <span className="rounded-full bg-bg px-2 py-0.5 text-xs font-medium text-muted">
+            {count}
+          </span>
+        )}
       </div>
-      <form onSubmit={handleSubmit} className="mb-5 flex gap-3">
-        <Input
-          placeholder={user ? "Пікір қалдыру..." : "Пікір қалдыру үшін кіріңіз"}
-          value={text}
-          disabled={!user || submitting}
-          onChange={(event) => setText(event.target.value)}
-        />
-        <Button type="submit" disabled={!user || submitting || !text.trim()}>
-          {submitting ? "Жіберілуде..." : "Жіберу"}
-        </Button>
-      </form>
-      {error ? <p className="mb-4 text-sm text-danger">{error}</p> : null}
-      {loading ? <p className="text-sm text-muted">Пікірлер жүктелуде...</p> : null}
-      {!loading && comments.length === 0 ? (
-        <p className="text-sm text-muted">Әзірге пікір жоқ. Алғашқы пікірді жазыңыз.</p>
-      ) : null}
-      <div className="space-y-4">
-        {comments.map((comment) => (
-          <article key={comment._id} className="rounded-3xl bg-surface px-4 py-3">
-            <div className="flex items-center justify-between gap-3">
-              <div>
-                <p className="text-sm font-semibold text-text">{comment.author.displayName}</p>
-                <p className="text-xs text-muted">@{comment.author.username}</p>
+
+      {/* comment list */}
+      <div className="min-h-0 flex-1 space-y-0.5">
+        {loading ? (
+          <>
+            <CommentSkeleton />
+            <CommentSkeleton />
+            <CommentSkeleton />
+          </>
+        ) : comments.length === 0 ? (
+          <div className="flex flex-col items-center gap-2 py-8 text-center">
+            <MessageCircle size={28} strokeWidth={1.5} className="text-border" />
+            <p className="text-sm font-medium text-text">Пікірлер жоқ</p>
+            <p className="text-xs text-muted">Алғашқы пікірді жазыңыз</p>
+          </div>
+        ) : (
+          comments.map((comment, i) => (
+            <article
+              key={comment._id}
+              className={`flex gap-3 py-3 ${i < comments.length - 1 ? "border-b border-border/50" : ""}`}
+            >
+              <Avatar name={comment.author.displayName} username={comment.author.username} />
+              <div className="min-w-0 flex-1">
+                <div className="flex items-baseline justify-between gap-2">
+                  <Link
+                    href={`/profile/${comment.author.username}`}
+                    className="text-sm font-semibold text-text hover:text-primary"
+                  >
+                    {comment.author.displayName}
+                  </Link>
+                  <span className="shrink-0 text-[11px] text-muted">{timeAgo(comment.createdAt)}</span>
+                </div>
+                <p className="mt-0.5 text-sm leading-relaxed text-muted">{comment.text}</p>
               </div>
-              <span className="text-xs text-muted">
-                {new Date(comment.createdAt).toLocaleDateString("kk-KZ")}
-              </span>
-            </div>
-            <p className="mt-3 text-sm leading-6 text-text">{comment.text}</p>
-          </article>
-        ))}
+            </article>
+          ))
+        )}
       </div>
-    </section>
+
+      {/* error */}
+      {error ? (
+        <p className="mt-3 rounded-xl border border-danger/20 bg-danger/5 px-3 py-2 text-xs text-danger">
+          {error}
+        </p>
+      ) : null}
+
+      {/* input */}
+      <div className="mt-4 border-t border-border/50 pt-4">
+        {user ? (
+          <form onSubmit={handleSubmit} className="flex items-end gap-2.5">
+            <Avatar name={user.displayName} username={user.username} size="sm" />
+            <div className="relative flex-1">
+              <textarea
+                ref={inputRef}
+                rows={1}
+                placeholder="Пікір жазыңыз..."
+                value={text}
+                onChange={(e) => {
+                  setText(e.target.value);
+                  e.target.style.height = "auto";
+                  e.target.style.height = `${e.target.scrollHeight}px`;
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    void handleSubmit(e as unknown as FormEvent);
+                  }
+                }}
+                disabled={submitting}
+                className="w-full resize-none overflow-hidden rounded-xl border border-border bg-bg px-3.5 py-2.5 text-sm text-text outline-none transition placeholder:text-muted/50 focus:border-primary focus:ring-2 focus:ring-primary/15 disabled:opacity-50"
+              />
+            </div>
+            <button
+              type="submit"
+              disabled={!text.trim() || submitting}
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary text-white transition hover:bg-primary-light disabled:opacity-30 active:translate-y-px"
+            >
+              <ArrowUp size={15} strokeWidth={2.5} />
+            </button>
+          </form>
+        ) : (
+          <Link
+            href="/login"
+            className="block rounded-xl border border-border bg-bg px-4 py-3 text-center text-sm text-muted transition hover:border-primary hover:text-primary"
+          >
+            Пікір қалдыру үшін кіріңіз
+          </Link>
+        )}
+      </div>
+    </div>
   );
 }

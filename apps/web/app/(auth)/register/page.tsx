@@ -1,13 +1,19 @@
+import Link from "next/link";
 import { RegisterForm } from "@/components/auth/RegisterForm";
 
 export default function RegisterPage() {
   return (
-    <main className="mx-auto min-h-screen max-w-md px-6 py-10">
-      <div className="mb-10 space-y-3 pt-10">
-        <p className="text-xs uppercase tracking-[0.35em] text-primary">Тіркелу</p>
-        <h1 className="text-3xl font-semibold text-text">Жаңа TASPA парақшасы</h1>
+    <div className="space-y-8">
+      <div className="space-y-2">
+        <h1 className="text-2xl font-bold text-text">Аккаунт жасаңыз</h1>
+        <p className="text-sm text-muted">
+          Аккаунтыңыз бар ма?{" "}
+          <Link href="/login" className="font-medium text-primary hover:underline">
+            Кіру
+          </Link>
+        </p>
       </div>
       <RegisterForm />
-    </main>
+    </div>
   );
 }

@@ -80,7 +80,21 @@ Status legend:
 - [ ] Open in Android Studio and test on emulator
 - [ ] Handle deep links and back-button behavior for Android
 
-## Phase 7. Data and Launch Readiness
+## Phase 7. Design System Overhaul (completed 2026-04-11)
+
+- [x] Generated DESIGN.md — full semantic design system (atmosphere, colors, typography, components, anti-patterns)
+- [x] Font: Inter → Outfit (Google Fonts, geometric, warm)
+- [x] Colors: warm parchment bg (#F8F7F4), charcoal text (#1C1917), deep violet accent (#5B21B6)
+- [x] Shadows: warm-tinted card shadow replacing cold grey
+- [x] Button: pill → rounded-xl, tactile active state, 44px min tap target
+- [x] Input: 48px height, warmer focus ring
+- [x] PhotoCard: hover lift animation (translateY -2px), skeleton shimmer class, tighter metadata row
+- [x] SideNav: active left-border indicator (3px violet bar), rounded-xl avatar
+- [x] TopBar: reduced to label-only eyebrow text
+- [x] Splash: full-screen violet gradient, photo mosaic background, editorial left-aligned layout
+- [x] Auth layout: 45/55 split desktop, warm bg on form side
+
+## Phase 9. Data and Launch Readiness
 
 - [x] Add seed/demo data script
 - [ ] Verify app startup instructions end to end
