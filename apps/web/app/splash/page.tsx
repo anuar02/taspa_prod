@@ -1,4 +1,8 @@
+"use client";
+
 import Link from "next/link";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 const mosaic = [
   "aspect-[3/4]", "aspect-square", "aspect-[2/3]",
@@ -8,6 +12,16 @@ const mosaic = [
 ];
 
 export default function SplashPage() {
+  const router = useRouter();
+
+  useEffect(() => {
+    const accessToken = window.localStorage.getItem("taspa.accessToken");
+
+    if (accessToken) {
+      router.replace("/feed");
+    }
+  }, [router]);
+
   return (
     <main
       className="relative flex min-h-[100dvh] flex-col overflow-hidden"

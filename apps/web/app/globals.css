@@ -35,6 +35,11 @@ a {
   100% { background-position: 400px 0; }
 }
 
+@keyframes authMosaicScroll {
+  from { transform: translateY(0); }
+  to { transform: translateY(-22%); }
+}
+
 .skeleton {
   background: linear-gradient(90deg, #E7E5E4 25%, #F8F7F4 50%, #E7E5E4 75%);
   background-size: 800px 100%;
@@ -54,4 +59,9 @@ a {
 /* Active nav indicator */
 .nav-item-active {
   border-left: 3px solid #5B21B6;
+}
+
+.auth-mosaic-scroll {
+  animation: authMosaicScroll 70s linear infinite;
+  will-change: transform;
 }

@@ -97,6 +97,7 @@ Status legend:
 ## Phase 9. Data and Launch Readiness
 
 - [x] Add seed/demo data script
+- [x] Add optional external import path for demo images (Pexels)
 - [ ] Verify app startup instructions end to end
 - [ ] Replace placeholder JWT secrets with real secrets
 - [ ] Final QA pass on register/login/upload/feed/profile/search across mobile and desktop

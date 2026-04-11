@@ -4,6 +4,19 @@ import { create } from "zustand";
 
 import { Photo } from "@/lib/types";
 
+function uniquePhotos(items: Photo[]) {
+  const seen = new Set<string>();
+
+  return items.filter((item) => {
+    if (seen.has(item._id)) {
+      return false;
+    }
+
+    seen.add(item._id);
+    return true;
+  });
+}
+
 type FeedState = {
   items: Photo[];
   page: number;
@@ -16,10 +29,10 @@ export const useFeedStore = create<FeedState>((set) => ({
   items: [],
   page: 1,
   hasMore: true,
-  setItems: (items, page) => set({ items, page, hasMore: items.length > 0 }),
+  setItems: (items, page) => set({ items: uniquePhotos(items), page, hasMore: items.length > 0 }),
   appendItems: (items, page) =>
     set((state) => ({
-      items: [...state.items, ...items],
+      items: uniquePhotos([...state.items, ...items]),
       page,
       hasMore: items.length > 0
     }))

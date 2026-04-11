@@ -125,10 +125,14 @@ export async function toggleLike(request: Request, response: Response) {
   const objectUserId = new Types.ObjectId(userId);
   const alreadyLiked = photo.likes.some((id) => id.toString() === userId);
 
-  photo.likes = alreadyLiked
-    ? photo.likes.filter((id) => id.toString() !== userId)
-    : [...photo.likes, objectUserId];
-  photo.likesCount = photo.likes.length;
+  if (alreadyLiked) {
+    photo.likes = photo.likes.filter((id) => id.toString() !== userId);
+    photo.likesCount = Math.max(0, photo.likesCount - 1);
+  } else {
+    photo.likes = [...photo.likes, objectUserId];
+    photo.likesCount += 1;
+  }
+
   photo.isPopular = photo.likesCount >= POPULAR_THRESHOLD;
   await photo.save();
 

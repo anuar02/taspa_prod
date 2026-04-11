@@ -7,6 +7,8 @@ type AuthUser = {
   username: string;
   email: string;
   displayName: string;
+  bio?: string;
+  avatarUrl?: string;
 };
 
 type AuthState = {
@@ -14,6 +16,7 @@ type AuthState = {
   accessToken: string | null;
   refreshToken: string | null;
   setSession: (payload: { user: AuthUser; accessToken: string; refreshToken: string }) => void;
+  updateUser: (user: Partial<AuthUser>) => void;
   clearSession: () => void;
 };
 
@@ -29,6 +32,10 @@ export const useAuthStore = create<AuthState>((set) => ({
 
     set({ user, accessToken, refreshToken });
   },
+  updateUser: (user) =>
+    set((state) => ({
+      user: state.user ? { ...state.user, ...user } : null
+    })),
   clearSession: () => {
     if (typeof window !== "undefined") {
       window.localStorage.removeItem("taspa.accessToken");

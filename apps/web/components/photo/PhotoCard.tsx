@@ -9,7 +9,7 @@ import { Photo } from "@/lib/types";
 import { api } from "@/lib/api";
 import { useAuthStore } from "@/store/authStore";
 
-export function PhotoCard({ photo }: { photo: Photo }) {
+export function PhotoCard({ photo, priority = false }: { photo: Photo; priority?: boolean }) {
   const user = useAuthStore((state) => state.user);
   const [likesCount, setLikesCount] = useState(photo.likesCount);
   const [liked, setLiked] = useState(Boolean(user?._id && photo.likes?.includes(user._id)));
@@ -59,6 +59,8 @@ export function PhotoCard({ photo }: { photo: Photo }) {
             fill
             className="object-cover"
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+            priority={priority}
+            loading={priority ? "eager" : "lazy"}
           />
         </div>
       </Link>

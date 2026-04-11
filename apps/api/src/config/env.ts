@@ -13,5 +13,6 @@ export const env = {
   cloudinaryCloudName: process.env.CLOUDINARY_CLOUD_NAME ?? "",
   cloudinaryApiKey: process.env.CLOUDINARY_API_KEY ?? "",
   cloudinaryApiSecret: process.env.CLOUDINARY_API_SECRET ?? "",
-  clientUrl: process.env.CLIENT_URL ?? "http://localhost:3000"
+  clientUrl: process.env.CLIENT_URL ?? "http://localhost:3000",
+  pexelsApiKey: process.env.PEXELS_API_KEY ?? ""
 };

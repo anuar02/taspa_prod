@@ -3,6 +3,7 @@ import { Request, Response } from "express";
 import { NotificationModel } from "../models/Notification.model.js";
 import { PhotoModel } from "../models/Photo.model.js";
 import { UserModel } from "../models/User.model.js";
+import { uploadImage } from "../services/cloudinary.service.js";
 import { emitToUser } from "../services/socket.service.js";
 import { sendError } from "../utils/http.js";
 
@@ -81,4 +82,54 @@ export async function userSuggestions(request: Request, response: Response) {
     .limit(8);
 
   return response.json({ items: users });
+}
+
+export async function uploadAvatar(request: Request, response: Response) {
+  const userId = request.user?.id;
+  if (!userId) return sendError(response, 401, "Unauthorized");
+
+  const file = request.file;
+  if (!file) return sendError(response, 400, "No image provided");
+
+  const { thumbnailUrl } = await uploadImage(file.buffer, "taspa/avatars");
+
+  const user = await UserModel.findByIdAndUpdate(
+    userId,
+    { avatarUrl: thumbnailUrl },
+    { new: true }
+  ).select("-password -refreshToken");
+
+  if (!user) return sendError(response, 404, "User not found");
+
+  return response.json({ item: user, avatarUrl: thumbnailUrl });
+}
+
+export async function updateMe(request: Request, response: Response) {
+  const userId = request.user?.id;
+
+  if (!userId) {
+    return sendError(response, 401, "Unauthorized");
+  }
+
+  const { displayName, bio, avatarUrl } = request.body as {
+    displayName?: string;
+    bio?: string;
+    avatarUrl?: string;
+  };
+
+  const user = await UserModel.findByIdAndUpdate(
+    userId,
+    {
+      ...(displayName !== undefined ? { displayName: String(displayName).trim() } : {}),
+      ...(bio !== undefined ? { bio: String(bio).trim() } : {}),
+      ...(avatarUrl !== undefined ? { avatarUrl: String(avatarUrl).trim() } : {})
+    },
+    { new: true }
+  ).select("-password -refreshToken");
+
+  if (!user) {
+    return sendError(response, 404, "User not found");
+  }
+
+  return response.json({ item: user });
 }

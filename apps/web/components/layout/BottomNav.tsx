@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Bookmark, House, PlusSquare, Search, User } from "lucide-react";
+import { Bookmark, House, PlusSquare, Search, Settings, User } from "lucide-react";
 import clsx from "clsx";
 
 import { useAuthStore } from "@/store/authStore";
@@ -25,9 +25,10 @@ export function BottomNav() {
   );
 
   return (
-    <nav className="fixed bottom-4 left-1/2 z-30 flex w-[min(92vw,420px)] -translate-x-1/2 items-center justify-between rounded-full border border-white/60 bg-white/90 px-4 py-3 shadow-card backdrop-blur lg:hidden">
+    <div className="fixed bottom-4 left-1/2 z-30 w-[min(92vw,420px)] -translate-x-1/2 lg:hidden">
+      <nav className="flex items-center justify-between rounded-full border border-white/60 bg-white/90 px-4 py-3 shadow-card backdrop-blur">
       {items.map(({ href, label, icon: Icon }) => {
-        const active = pathname.startsWith(href);
+        const active = pathname?.startsWith(href) ?? false;
 
         return (
           <Link
@@ -43,6 +44,20 @@ export function BottomNav() {
           </Link>
         );
       })}
-    </nav>
+      {user ? (
+        <Link
+          href={profileHref}
+          className={clsx(
+            "flex min-w-0 flex-col items-center gap-1 text-[11px] font-medium",
+            pathname?.startsWith("/profile") ? "text-primary" : "text-muted"
+          )}
+          aria-label="Профиль баптаулары"
+        >
+          <Settings size={18} />
+          <span className="truncate">Баптау</span>
+        </Link>
+      ) : null}
+      </nav>
+    </div>
   );
 }

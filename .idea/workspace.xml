@@ -5,27 +5,30 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="580c0d75-615b-44d8-8c68-024be5103102" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.env.example" beforeDir="false" afterPath="$PROJECT_DIR$/.env.example" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/PROJECT_PLAN.md" beforeDir="false" afterPath="$PROJECT_DIR$/PROJECT_PLAN.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/api/src/scripts/seed.ts" beforeDir="false" afterPath="$PROJECT_DIR$/apps/api/src/scripts/seed.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/web/app/(auth)/login/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/apps/web/app/(auth)/login/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/web/app/(auth)/register/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/apps/web/app/(auth)/register/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/web/app/(main)/layout.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/apps/web/app/(main)/layout.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/api/.env.example" beforeDir="false" afterPath="$PROJECT_DIR$/apps/api/.env.example" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/api/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/apps/api/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/api/src/config/env.ts" beforeDir="false" afterPath="$PROJECT_DIR$/apps/api/src/config/env.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/api/src/controllers/photo.controller.ts" beforeDir="false" afterPath="$PROJECT_DIR$/apps/api/src/controllers/photo.controller.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/api/src/controllers/user.controller.ts" beforeDir="false" afterPath="$PROJECT_DIR$/apps/api/src/controllers/user.controller.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/api/src/routes/user.routes.ts" beforeDir="false" afterPath="$PROJECT_DIR$/apps/api/src/routes/user.routes.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/web/app/(auth)/layout.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/apps/web/app/(auth)/layout.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/web/app/(main)/feed/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/apps/web/app/(main)/feed/page.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/apps/web/app/globals.css" beforeDir="false" afterPath="$PROJECT_DIR$/apps/web/app/globals.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/apps/web/app/splash/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/apps/web/app/splash/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/web/components/auth/LoginForm.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/apps/web/components/auth/LoginForm.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/web/components/auth/RegisterForm.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/apps/web/components/auth/RegisterForm.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/web/components/layout/AuthGuard.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/apps/web/components/layout/AuthGuard.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/web/components/layout/BottomNav.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/apps/web/components/layout/BottomNav.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/apps/web/components/layout/SideNav.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/apps/web/components/layout/SideNav.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/web/components/layout/TopBar.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/apps/web/components/layout/TopBar.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/web/components/photo/CommentSection.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/apps/web/components/photo/CommentSection.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/apps/web/components/photo/PhotoCard.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/apps/web/components/photo/PhotoCard.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/web/components/photo/PhotoDetail.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/apps/web/components/photo/PhotoDetail.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/apps/web/components/photo/PhotoGrid.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/apps/web/components/photo/PhotoGrid.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/web/components/ui/Button.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/apps/web/components/ui/Button.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/web/components/ui/Input.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/apps/web/components/ui/Input.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/web/tailwind.config.ts" beforeDir="false" afterPath="$PROJECT_DIR$/apps/web/tailwind.config.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/web/components/photo/ProfileView.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/apps/web/components/photo/ProfileView.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/web/next-env.d.ts" beforeDir="false" afterPath="$PROJECT_DIR$/apps/web/next-env.d.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/web/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/apps/web/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/web/store/authStore.ts" beforeDir="false" afterPath="$PROJECT_DIR$/apps/web/store/authStore.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/web/store/feedStore.ts" beforeDir="false" afterPath="$PROJECT_DIR$/apps/web/store/feedStore.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/apps/web/tsconfig.tsbuildinfo" beforeDir="false" afterPath="$PROJECT_DIR$/apps/web/tsconfig.tsbuildinfo" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -102,7 +105,7 @@
       <option name="presentableId" value="Default" />
       <updated>1775909131360</updated>
       <workItem from="1775909132382" duration="2330000" />
-      <workItem from="1775911488670" duration="8381000" />
+      <workItem from="1775911488670" duration="13962000" />
     </task>
     <servers />
   </component>

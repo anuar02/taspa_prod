@@ -20,11 +20,28 @@ export default function FeedPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const sentinelRef = useRef<HTMLDivElement | null>(null);
+  const inFlightRef = useRef(false);
+  const loadedPagesRef = useRef<Set<number>>(new Set());
+  const requestedPagesRef = useRef<Set<string>>(new Set());
+  const initialLoadKeyRef = useRef<string | null>(null);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
+    loadedPagesRef.current = new Set();
+    inFlightRef.current = false;
+    requestedPagesRef.current = new Set();
+
+    const initialKey = `${tab}-1`;
+
+    if (initialLoadKeyRef.current === initialKey) {
+      return;
+    }
+
+    initialLoadKeyRef.current = initialKey;
+    requestedPagesRef.current.add(initialKey);
 
     async function loadInitial() {
+      inFlightRef.current = true;
       setLoading(true);
       setError("");
       try {
@@ -32,9 +49,12 @@ export default function FeedPage() {
           params: { tab, page: 1, limit: 12 }
         });
         setItems(data.items, 1);
+        loadedPagesRef.current.add(1);
       } catch {
         setError("Лента жүктелмеді. Байланысты тексеріңіз.");
+        requestedPagesRef.current.delete(initialKey);
       } finally {
+        inFlightRef.current = false;
         setLoading(false);
       }
     }
@@ -45,21 +65,33 @@ export default function FeedPage() {
   useEffect(() => {
     const observer = new IntersectionObserver(async (entries) => {
       const entry = entries[0];
+      const nextPage = page + 1;
+      const requestKey = `${tab}-${nextPage}`;
 
-      if (!entry?.isIntersecting || loading || !hasMore) {
+      if (
+        !entry?.isIntersecting ||
+        loading ||
+        !hasMore ||
+        inFlightRef.current ||
+        loadedPagesRef.current.has(nextPage) ||
+        requestedPagesRef.current.has(requestKey)
+      ) {
         return;
       }
 
+      requestedPagesRef.current.add(requestKey);
+      inFlightRef.current = true;
       setLoading(true);
-      const nextPage = page + 1;
       try {
         const { data } = await api.get<{ items: Photo[] }>("/photos", {
           params: { tab, page: nextPage, limit: 12 }
         });
         appendItems(data.items, nextPage);
+        loadedPagesRef.current.add(nextPage);
       } catch {
-        // silently stop paginating on error
+        requestedPagesRef.current.delete(requestKey);
       } finally {
+        inFlightRef.current = false;
         setLoading(false);
       }
     });
@@ -90,6 +122,15 @@ export default function FeedPage() {
       </div>
       {error ? (
         <p className="mt-8 text-center text-sm text-danger">{error}</p>
+      ) : loading && items.length === 0 ? (
+        <div className="columns-2 gap-4 md:columns-3 lg:columns-4 xl:columns-5 2xl:columns-6 [@media(min-width:1800px)]:columns-7 [@media(min-width:2200px)]:columns-8">
+          {Array.from({ length: 8 }).map((_, index) => (
+            <div
+              key={index}
+              className={`skeleton mb-4 break-inside-avoid rounded-[28px] ${index % 2 === 0 ? "h-80" : "h-60"}`}
+            />
+          ))}
+        </div>
       ) : (
         <>
           <PhotoGrid items={items} />

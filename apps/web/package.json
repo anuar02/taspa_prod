@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "clean": "rm -rf .next",
+    "predev": "rm -rf .next",
     "dev": "NODE_ENV=development next dev",
     "build": "NODE_ENV=production next build",
     "start": "NODE_ENV=production next start",
