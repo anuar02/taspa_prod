@@ -37,6 +37,13 @@ app.get("/health", (_request, response) => {
   response.json({ ok: true });
 });
 
+app.get("/api", (_request, response) => {
+  response.json({
+    ok: true,
+    service: "taspa-api"
+  });
+});
+
 app.use("/api/auth", authRouter);
 app.use("/api/photos", photoRouter);
 app.use("/api/comments", commentRouter);
