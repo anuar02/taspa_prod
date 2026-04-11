@@ -1,5 +1,6 @@
 "use client";
 
+import { ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { LogOut } from "lucide-react";
 
@@ -9,11 +10,13 @@ import { useAuthStore } from "@/store/authStore";
 export function LogoutButton({
   className,
   label,
-  iconOnly = false
+  iconOnly = false,
+  children
 }: {
   className?: string;
   label?: string;
   iconOnly?: boolean;
+  children?: ReactNode;
 }) {
   const router = useRouter();
   const clearSession = useAuthStore((state) => state.clearSession);
@@ -35,8 +38,12 @@ export function LogoutButton({
 
   return (
     <button type="button" onClick={handleLogout} className={className}>
-      <LogOut size={16} />
-      {!iconOnly ? <span>{label ?? "Шығу"}</span> : null}
+      {children ?? (
+        <>
+          <LogOut size={16} />
+          {!iconOnly ? <span>{label ?? "Шығу"}</span> : null}
+        </>
+      )}
     </button>
   );
 }

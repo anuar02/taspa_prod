@@ -3,9 +3,10 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Bookmark, ChevronUp, House, PlusSquare, Settings, Search, User } from "lucide-react";
+import { Bookmark, ChevronUp, House, LogOut, PlusSquare, Settings, Search, User } from "lucide-react";
 import clsx from "clsx";
 
+import { LogoutButton } from "@/components/layout/LogoutButton";
 import { useAuthStore } from "@/store/authStore";
 
 const items = [
@@ -117,6 +118,10 @@ export function SideNav() {
                 <Settings size={16} />
                 <span>Профиль</span>
               </Link>
+              <LogoutButton className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-sm font-medium text-muted transition-colors hover:bg-bg hover:text-text">
+                <LogOut size={16} />
+                <span>Шығу</span>
+              </LogoutButton>
             </div>
           ) : null}
         </div>
