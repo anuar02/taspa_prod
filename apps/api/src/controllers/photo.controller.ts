@@ -1,0 +1,202 @@
+import { Request, Response } from "express";
+import { Types } from "mongoose";
+
+import { NotificationModel } from "../models/Notification.model.js";
+import { PhotoCategory, PhotoModel } from "../models/Photo.model.js";
+import { UserModel } from "../models/User.model.js";
+import { emitToUser } from "../services/socket.service.js";
+import { uploadImage } from "../services/cloudinary.service.js";
+import { sendError } from "../utils/http.js";
+
+const POPULAR_THRESHOLD = 20;
+
+function toStringArray(value: unknown) {
+  if (Array.isArray(value)) {
+    return value.map(String).filter(Boolean);
+  }
+
+  if (typeof value === "string") {
+    return value
+      .split(",")
+      .map((item) => item.trim())
+      .filter(Boolean);
+  }
+
+  return [];
+}
+
+export async function listPhotos(request: Request, response: Response) {
+  const page = Number(request.query.page ?? 1);
+  const limit = Number(request.query.limit ?? 12);
+  const tab = String(request.query.tab ?? "all");
+
+  const query: Record<string, unknown> = {};
+
+  if (tab === "popular") {
+    query.isPopular = true;
+  }
+
+  if (tab === "following" && request.user?.id) {
+    const user = await UserModel.findById(request.user.id);
+    query.author = { $in: user?.following ?? [] };
+  }
+
+  const photos = await PhotoModel.find(query)
+    .populate("author", "username displayName avatarUrl")
+    .sort({ createdAt: -1 })
+    .skip((page - 1) * limit)
+    .limit(limit);
+
+  return response.json({ items: photos, page, limit });
+}
+
+export async function getPhoto(request: Request, response: Response) {
+  const photo = await PhotoModel.findByIdAndUpdate(
+    request.params.id,
+    { $inc: { views: 1 } },
+    { new: true }
+  ).populate("author", "username displayName avatarUrl");
+
+  if (!photo) {
+    return sendError(response, 404, "Photo not found");
+  }
+
+  return response.json({ item: photo });
+}
+
+export async function createPhoto(request: Request, response: Response) {
+  if (!request.user?.id) {
+    return sendError(response, 401, "Unauthorized");
+  }
+
+  if (!request.file) {
+    return sendError(response, 400, "Image is required");
+  }
+
+  const upload = await uploadImage(request.file.buffer, "taspa/photos");
+  const tags = toStringArray(request.body.tags);
+  const category = String(request.body.category ?? "OTHER").toUpperCase() as PhotoCategory;
+
+  const photo = await PhotoModel.create({
+    author: request.user.id,
+    imageUrl: upload.imageUrl,
+    thumbnailUrl: upload.thumbnailUrl,
+    caption: String(request.body.caption ?? ""),
+    tags,
+    category,
+    location: String(request.body.location ?? "")
+  });
+
+  await UserModel.findByIdAndUpdate(request.user.id, { $inc: { postsCount: 1 } });
+
+  return response.status(201).json({ item: photo });
+}
+
+export async function deletePhoto(request: Request, response: Response) {
+  const photo = await PhotoModel.findById(request.params.id);
+
+  if (!photo) {
+    return sendError(response, 404, "Photo not found");
+  }
+
+  if (photo.author.toString() !== request.user?.id) {
+    return sendError(response, 403, "Forbidden");
+  }
+
+  await photo.deleteOne();
+  await UserModel.findByIdAndUpdate(request.user.id, { $inc: { postsCount: -1 } });
+
+  return response.status(204).send();
+}
+
+export async function toggleLike(request: Request, response: Response) {
+  const userId = request.user?.id;
+
+  if (!userId) {
+    return sendError(response, 401, "Unauthorized");
+  }
+
+  const photo = await PhotoModel.findById(request.params.id);
+
+  if (!photo) {
+    return sendError(response, 404, "Photo not found");
+  }
+
+  const objectUserId = new Types.ObjectId(userId);
+  const alreadyLiked = photo.likes.some((id) => id.toString() === userId);
+
+  photo.likes = alreadyLiked
+    ? photo.likes.filter((id) => id.toString() !== userId)
+    : [...photo.likes, objectUserId];
+  photo.likesCount = photo.likes.length;
+  photo.isPopular = photo.likesCount >= POPULAR_THRESHOLD;
+  await photo.save();
+
+  if (!alreadyLiked && photo.author.toString() !== userId) {
+    await NotificationModel.create({
+      recipient: photo.author,
+      sender: userId,
+      type: "LIKE",
+      photo: photo.id
+    });
+
+    emitToUser(photo.author.toString(), "like_updated", {
+      photoId: photo.id,
+      likesCount: photo.likesCount
+    });
+  }
+
+  return response.json({ liked: !alreadyLiked, likesCount: photo.likesCount });
+}
+
+export async function toggleSave(request: Request, response: Response) {
+  const userId = request.user?.id;
+
+  if (!userId) {
+    return sendError(response, 401, "Unauthorized");
+  }
+
+  const photo = await PhotoModel.findById(request.params.id);
+
+  if (!photo) {
+    return sendError(response, 404, "Photo not found");
+  }
+
+  const objectUserId = new Types.ObjectId(userId);
+  const alreadySaved = photo.saves.some((id) => id.toString() === userId);
+
+  photo.saves = alreadySaved
+    ? photo.saves.filter((id) => id.toString() !== userId)
+    : [...photo.saves, objectUserId];
+  await photo.save();
+
+  if (!alreadySaved && photo.author.toString() !== userId) {
+    await NotificationModel.create({
+      recipient: photo.author,
+      sender: userId,
+      type: "SAVE",
+      photo: photo.id
+    });
+  }
+
+  return response.json({ saved: !alreadySaved });
+}
+
+export async function savedPhotos(request: Request, response: Response) {
+  const userId = request.user?.id;
+
+  const photos = await PhotoModel.find({ saves: userId })
+    .populate("author", "username displayName avatarUrl")
+    .sort({ createdAt: -1 });
+
+  return response.json({ items: photos });
+}
+
+export async function popularPhotos(_request: Request, response: Response) {
+  const photos = await PhotoModel.find({ isPopular: true })
+    .populate("author", "username displayName avatarUrl")
+    .sort({ likesCount: -1, createdAt: -1 })
+    .limit(24);
+
+  return response.json({ items: photos });
+}
