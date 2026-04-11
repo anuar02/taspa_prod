@@ -1,8 +1,14 @@
 import axios from "axios";
 import { AxiosHeaders, InternalAxiosRequestConfig } from "axios";
 
+function normalizeApiUrl(value?: string) {
+  return (value ?? "http://localhost:4000/api").trim().replace(/\s+/g, "").replace(/\/+$/, "");
+}
+
+const apiBaseUrl = normalizeApiUrl(process.env.NEXT_PUBLIC_API_URL);
+
 export const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000/api"
+  baseURL: apiBaseUrl
 });
 
 api.interceptors.request.use((config) => {
@@ -39,7 +45,7 @@ api.interceptors.response.use(
       }
 
       const refreshResponse = await axios.post(
-        `${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000/api"}/auth/refresh`,
+        `${apiBaseUrl}/auth/refresh`,
         { refreshToken }
       );
 
