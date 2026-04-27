@@ -2,10 +2,26 @@ import { Request, Response } from "express";
 
 import { NotificationModel } from "../models/Notification.model.js";
 import { PhotoModel } from "../models/Photo.model.js";
-import { UserModel } from "../models/User.model.js";
+import { IUser, UserModel } from "../models/User.model.js";
 import { uploadImage } from "../services/cloudinary.service.js";
 import { emitToUser } from "../services/socket.service.js";
 import { sendError } from "../utils/http.js";
+
+function toPublicUser(user: Pick<
+  IUser,
+  "username" | "displayName" | "bio" | "avatarUrl" | "postsCount" | "followersCount" | "followingCount"
+> & { _id: { toString(): string } }) {
+  return {
+    _id: user._id.toString(),
+    username: user.username,
+    displayName: user.displayName,
+    bio: user.bio,
+    avatarUrl: user.avatarUrl,
+    postsCount: user.postsCount,
+    followersCount: user.followersCount,
+    followingCount: user.followingCount
+  };
+}
 
 export async function getUserProfile(request: Request, response: Response) {
   const username = String(request.params.username).toLowerCase();
@@ -20,6 +36,45 @@ export async function getUserProfile(request: Request, response: Response) {
   return response.json({ item: user });
 }
 
+async function listConnections(userIdList: IUser["followers"]) {
+  if (userIdList.length === 0) {
+    return [];
+  }
+
+  const users = await UserModel.find({ _id: { $in: userIdList } }).select(
+    "username displayName bio avatarUrl postsCount followersCount followingCount"
+  );
+  const byId = new Map(users.map((user) => [user._id.toString(), toPublicUser(user)]));
+
+  return userIdList
+    .map((id) => byId.get(id.toString()))
+    .filter((item): item is ReturnType<typeof toPublicUser> => Boolean(item));
+}
+
+export async function getFollowers(request: Request, response: Response) {
+  const username = String(request.params.username).toLowerCase();
+  const user = await UserModel.findOne({ username }).select("followers");
+
+  if (!user) {
+    return sendError(response, 404, "User not found");
+  }
+
+  const items = await listConnections(user.followers);
+  return response.json({ items });
+}
+
+export async function getFollowing(request: Request, response: Response) {
+  const username = String(request.params.username).toLowerCase();
+  const user = await UserModel.findOne({ username }).select("following");
+
+  if (!user) {
+    return sendError(response, 404, "User not found");
+  }
+
+  const items = await listConnections(user.following);
+  return response.json({ items });
+}
+
 export async function getUserPhotos(request: Request, response: Response) {
   const page = Number(request.query.page ?? 1);
   const limit = Number(request.query.limit ?? 12);
@@ -30,7 +85,13 @@ export async function getUserPhotos(request: Request, response: Response) {
     return sendError(response, 404, "User not found");
   }
 
-  const photos = await PhotoModel.find({ author: user.id })
+  const isOwner = request.user?.id === user.id;
+  const query: Record<string, unknown> = { author: user.id };
+  if (!isOwner) {
+    query.isPrivate = { $ne: true };
+  }
+
+  const photos = await PhotoModel.find(query)
     .sort({ createdAt: -1 })
     .skip((page - 1) * limit)
     .limit(limit);

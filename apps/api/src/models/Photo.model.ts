@@ -16,6 +16,7 @@ export interface IPhoto {
   saves: Types.ObjectId[];
   views: number;
   isPopular: boolean;
+  isPrivate: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -40,7 +41,8 @@ const photoSchema = new Schema<IPhoto, PhotoModel>(
     commentsCount: { type: Number, default: 0 },
     saves: [{ type: Schema.Types.ObjectId, ref: "User", default: [] }],
     views: { type: Number, default: 0 },
-    isPopular: { type: Boolean, default: false }
+    isPopular: { type: Boolean, default: false },
+    isPrivate: { type: Boolean, default: false }
   },
   { timestamps: true }
 );

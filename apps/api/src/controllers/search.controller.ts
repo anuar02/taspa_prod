@@ -12,6 +12,14 @@ const categoryPreview = [
   { key: "OTHER", label: "Басқа" }
 ];
 
+function resolveCategoryQuery(query: string) {
+  const normalized = query.trim().toLowerCase();
+  const match = categoryPreview.find(
+    (item) => item.key.toLowerCase() === normalized || item.label.toLowerCase() === normalized
+  );
+  return match?.key;
+}
+
 export async function search(request: Request, response: Response) {
   const q = String(request.query.q ?? "").trim();
   const type = String(request.query.type ?? "photo");
@@ -45,13 +53,18 @@ export async function search(request: Request, response: Response) {
     return response.json({ items: photos });
   }
 
-  const photos = await PhotoModel.find({
-    $or: [
-      { caption: { $regex: q, $options: "i" } },
-      { location: { $regex: q, $options: "i" } },
-      { tags: { $regex: q, $options: "i" } }
-    ]
-  })
+  const categoryKey = resolveCategoryQuery(q);
+  const photoFilters: Array<Record<string, unknown>> = [
+    { caption: { $regex: q, $options: "i" } },
+    { location: { $regex: q, $options: "i" } },
+    { tags: { $regex: q, $options: "i" } }
+  ];
+
+  if (categoryKey) {
+    photoFilters.push({ category: categoryKey });
+  }
+
+  const photos = await PhotoModel.find({ $or: photoFilters })
     .populate("author", "username displayName avatarUrl")
     .skip((page - 1) * limit)
     .limit(limit);

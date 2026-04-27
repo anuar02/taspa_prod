@@ -20,3 +20,19 @@ export function authMiddleware(request: Request, response: Response, next: NextF
     return sendError(response, 401, "Invalid token");
   }
 }
+
+export function optionalAuthMiddleware(request: Request, _response: Response, next: NextFunction) {
+  const authorization = request.headers.authorization;
+
+  if (authorization?.startsWith("Bearer ")) {
+    try {
+      const token = authorization.replace("Bearer ", "");
+      const payload = verifyAccessToken(token);
+      request.user = { id: payload.userId };
+    } catch {
+      // token invalid — proceed as guest
+    }
+  }
+
+  next();
+}

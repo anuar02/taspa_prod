@@ -29,15 +29,16 @@ export async function listPhotos(request: Request, response: Response) {
   const page = Number(request.query.page ?? 1);
   const limit = Number(request.query.limit ?? 12);
   const tab = String(request.query.tab ?? "all");
+  const userId = request.user?.id;
 
-  const query: Record<string, unknown> = {};
+  const query: Record<string, unknown> = { isPrivate: { $ne: true } };
 
   if (tab === "popular") {
     query.isPopular = true;
   }
 
-  if (tab === "following" && request.user?.id) {
-    const user = await UserModel.findById(request.user.id);
+  if (tab === "following" && userId) {
+    const user = await UserModel.findById(userId);
     query.author = { $in: user?.following ?? [] };
   }
 
@@ -61,6 +62,10 @@ export async function getPhoto(request: Request, response: Response) {
     return sendError(response, 404, "Photo not found");
   }
 
+  if (photo.isPrivate && photo.author._id.toString() !== request.user?.id) {
+    return sendError(response, 403, "Forbidden");
+  }
+
   return response.json({ item: photo });
 }
 
@@ -76,6 +81,7 @@ export async function createPhoto(request: Request, response: Response) {
   const upload = await uploadImage(request.file.buffer, "taspa/photos");
   const tags = toStringArray(request.body.tags);
   const category = String(request.body.category ?? "OTHER").toUpperCase() as PhotoCategory;
+  const isPrivate = request.body.isPrivate === "true" || request.body.isPrivate === true;
 
   const photo = await PhotoModel.create({
     author: request.user.id,
@@ -84,7 +90,8 @@ export async function createPhoto(request: Request, response: Response) {
     caption: String(request.body.caption ?? ""),
     tags,
     category,
-    location: String(request.body.location ?? "")
+    location: String(request.body.location ?? ""),
+    isPrivate
   });
 
   await UserModel.findByIdAndUpdate(request.user.id, { $inc: { postsCount: 1 } });
@@ -197,7 +204,7 @@ export async function savedPhotos(request: Request, response: Response) {
 }
 
 export async function popularPhotos(_request: Request, response: Response) {
-  const photos = await PhotoModel.find({ isPopular: true })
+  const photos = await PhotoModel.find({ isPopular: true, isPrivate: { $ne: true } })
     .populate("author", "username displayName avatarUrl")
     .sort({ likesCount: -1, createdAt: -1 })
     .limit(24);
