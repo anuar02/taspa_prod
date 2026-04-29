@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Bookmark, ChevronUp, House, LogOut, PlusSquare, Settings, Search, User } from "lucide-react";
+import { Bookmark, ChevronUp, House, LogOut, PlusSquare, Search, User } from "lucide-react";
 import clsx from "clsx";
 
 import { LogoutButton } from "@/components/layout/LogoutButton";
@@ -54,7 +54,7 @@ export function SideNav() {
     <aside className="fixed left-0 top-0 hidden h-full w-56 flex-col border-r border-border bg-surface lg:flex">
       {/* Logo */}
       <div className="px-6 py-7">
-        <Link href="/splash">
+        <Link href="/feed">
           <p className="text-xs font-bold uppercase tracking-[0.3em] text-primary">Taspa</p>
           <p className="mt-0.5 text-[11px] text-muted">Әр сурет — бір тарих</p>
         </Link>
@@ -110,14 +110,6 @@ export function SideNav() {
 
           {open ? (
             <div className="absolute bottom-full left-0 right-0 mb-2 rounded-2xl border border-border bg-white p-2 shadow-card">
-              <Link
-                href={profileHref}
-                onClick={() => setOpen(false)}
-                className="flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium text-text transition-colors hover:bg-bg"
-              >
-                <Settings size={16} />
-                <span>Профиль</span>
-              </Link>
               <LogoutButton className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-sm font-medium text-muted transition-colors hover:bg-bg hover:text-text">
                 <LogOut size={16} />
                 <span>Шығу</span>

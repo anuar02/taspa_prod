@@ -2,15 +2,17 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Heart, MapPin, Bookmark } from "lucide-react";
+import { Heart, MapPin, Bookmark, Lock } from "lucide-react";
 import { useState } from "react";
 
 import { Photo } from "@/lib/types";
 import { api } from "@/lib/api";
 import { useAuthStore } from "@/store/authStore";
+import { useSavedStore } from "@/store/savedStore";
 
 export function PhotoCard({ photo, priority = false }: { photo: Photo; priority?: boolean }) {
   const user = useAuthStore((state) => state.user);
+  const syncSavedItem = useSavedStore((state) => state.syncItem);
   const [likesCount, setLikesCount] = useState(photo.likesCount);
   const [liked, setLiked] = useState(Boolean(user?._id && photo.likes?.includes(user._id)));
   const [saved, setSaved] = useState(Boolean(user?._id && photo.saves?.includes(user._id)));
@@ -36,14 +38,37 @@ export function PhotoCard({ photo, priority = false }: { photo: Photo; priority?
 
   async function handleSave() {
     if (!user?._id || pendingAction) return;
+    const previousSaves = photo.saves ?? [];
+    const savesWithoutViewer = previousSaves.filter((id) => id !== user._id);
     const nextSaved = !saved;
+    const optimisticPhoto = {
+      ...photo,
+      saves: nextSaved ? [...savesWithoutViewer, user._id] : savesWithoutViewer
+    };
+
     setPendingAction("save");
     setSaved(nextSaved);
+    syncSavedItem(optimisticPhoto, nextSaved);
     try {
       const { data } = await api.post(`/photos/${photo._id}/save`);
-      setSaved(data.saved);
+      const resolvedSaved = Boolean(data.saved);
+      setSaved(resolvedSaved);
+      syncSavedItem(
+        {
+          ...photo,
+          saves: resolvedSaved ? [...savesWithoutViewer, user._id] : savesWithoutViewer
+        },
+        resolvedSaved
+      );
     } catch {
       setSaved(!nextSaved);
+      syncSavedItem(
+        {
+          ...photo,
+          saves: previousSaves
+        },
+        !nextSaved
+      );
     } finally {
       setPendingAction(null);
     }
@@ -62,6 +87,12 @@ export function PhotoCard({ photo, priority = false }: { photo: Photo; priority?
             priority={priority}
             loading={priority ? "eager" : "lazy"}
           />
+          {photo.isPrivate && (
+            <div className="absolute right-2 top-2 flex items-center gap-1 rounded-full bg-black/50 px-2 py-1 text-white backdrop-blur-sm">
+              <Lock size={11} />
+              <span className="text-[10px] font-medium">Жеке</span>
+            </div>
+          )}
         </div>
       </Link>
 

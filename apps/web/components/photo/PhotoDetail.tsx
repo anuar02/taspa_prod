@@ -3,16 +3,21 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Heart, MessageCircle, Share2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { ArrowLeft, Bookmark, Heart, Lock, MapPin, MessageCircle, Share2 } from "lucide-react";
 
 import { api } from "@/lib/api";
 import { Photo } from "@/lib/types";
 import { useAuthStore } from "@/store/authStore";
 import { Button } from "@/components/ui/Button";
+import { useSavedStore } from "@/store/savedStore";
 
 export function PhotoDetail({ photo, aside }: { photo: Photo; aside?: React.ReactNode }) {
+  const router = useRouter();
   const user = useAuthStore((state) => state.user);
+  const syncSavedItem = useSavedStore((state) => state.syncItem);
   const [liked, setLiked] = useState(Boolean(user?._id && photo.likes?.includes(user._id)));
+  const [saved, setSaved] = useState(Boolean(user?._id && photo.saves?.includes(user._id)));
   const [likesCount, setLikesCount] = useState(photo.likesCount);
   const [pending, setPending] = useState(false);
 
@@ -43,8 +48,56 @@ export function PhotoDetail({ photo, aside }: { photo: Photo; aside?: React.Reac
     }
   }
 
+  async function handleSave() {
+    if (!user?._id || pending) return;
+    const previousSaves = photo.saves ?? [];
+    const savesWithoutViewer = previousSaves.filter((id) => id !== user._id);
+    const nextSaved = !saved;
+    const optimisticPhoto = {
+      ...photo,
+      saves: nextSaved ? [...savesWithoutViewer, user._id] : savesWithoutViewer
+    };
+
+    setPending(true);
+    setSaved(nextSaved);
+    syncSavedItem(optimisticPhoto, nextSaved);
+    try {
+      const { data } = await api.post(`/photos/${photo._id}/save`);
+      const resolvedSaved = Boolean(data.saved);
+      setSaved(resolvedSaved);
+      syncSavedItem(
+        {
+          ...photo,
+          saves: resolvedSaved ? [...savesWithoutViewer, user._id] : savesWithoutViewer
+        },
+        resolvedSaved
+      );
+    } catch {
+      setSaved(!nextSaved);
+      syncSavedItem(
+        {
+          ...photo,
+          saves: previousSaves
+        },
+        !nextSaved
+      );
+    } finally {
+      setPending(false);
+    }
+  }
+
   return (
     <section className="lg:grid lg:grid-cols-[minmax(0,1fr)_22rem] lg:gap-8 xl:grid-cols-[minmax(0,1fr)_24rem]">
+      {/* back button — mobile only */}
+      <button
+        type="button"
+        onClick={() => router.back()}
+        className="mb-4 flex items-center gap-1.5 text-sm font-medium text-text transition hover:text-primary active:scale-95 lg:hidden"
+      >
+        <ArrowLeft size={18} />
+        Артқа
+      </button>
+
       <div className="min-w-0">
         <div className="relative aspect-[4/5] overflow-hidden rounded-[32px] bg-surface shadow-card lg:h-[calc(100vh-7rem)] lg:max-h-[980px] lg:min-h-[640px] lg:aspect-auto">
           <Image
@@ -54,6 +107,12 @@ export function PhotoDetail({ photo, aside }: { photo: Photo; aside?: React.Reac
             className="object-contain"
             sizes="(max-width: 1024px) 100vw, 70vw"
           />
+          {photo.isPrivate && (
+            <div className="absolute right-3 top-3 flex items-center gap-1.5 rounded-full bg-black/50 px-3 py-1.5 text-white backdrop-blur-sm">
+              <Lock size={13} />
+              <span className="text-xs font-medium">Жеке фото</span>
+            </div>
+          )}
         </div>
       </div>
 
@@ -78,8 +137,17 @@ export function PhotoDetail({ photo, aside }: { photo: Photo; aside?: React.Reac
           <Button variant="secondary" className="gap-2 cursor-default">
             <MessageCircle size={16} /> {photo.commentsCount}
           </Button>
+          <Button
+            variant="secondary"
+            className={`gap-2 ${saved ? "bg-primary/10 text-primary" : ""}`}
+            onClick={handleSave}
+            disabled={!user || pending}
+          >
+            <Bookmark size={16} className={saved ? "fill-current" : ""} />
+            {saved ? "Сақталды" : "Сақтау"}
+          </Button>
           <Button variant="secondary" className="gap-2" onClick={handleShare}>
-            <Share2 size={16} /> Бөлісу
+            <Share2 size={16} />
           </Button>
         </div>
 
@@ -97,7 +165,10 @@ export function PhotoDetail({ photo, aside }: { photo: Photo; aside?: React.Reac
         </div>
 
         {photo.location ? (
-          <p className="text-sm text-muted">📍 {photo.location}</p>
+          <div className="flex items-center gap-2 rounded-[24px] bg-white px-4 py-3 text-sm text-muted shadow-card">
+            <MapPin size={15} className="text-primary" />
+            <span>{photo.location}</span>
+          </div>
         ) : null}
 
         {aside ? <div>{aside}</div> : null}

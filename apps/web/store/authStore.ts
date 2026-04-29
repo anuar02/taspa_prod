@@ -2,13 +2,18 @@
 
 import { create } from "zustand";
 
-type AuthUser = {
+export type AuthUser = {
   _id: string;
   username: string;
   email: string;
   displayName: string;
   bio?: string;
   avatarUrl?: string;
+  followers?: string[];
+  following?: string[];
+  postsCount?: number;
+  followersCount?: number;
+  followingCount?: number;
 };
 
 type AuthState = {

@@ -172,7 +172,7 @@ export function CommentSection({ photoId, commentsCount }: { photoId: string; co
       {/* input */}
       <div className="mt-4 border-t border-border/50 pt-4">
         {user ? (
-          <form onSubmit={handleSubmit} className="flex items-end gap-2.5">
+          <form onSubmit={handleSubmit} className="flex gap-2.5">
             <Avatar name={user.displayName} username={user.username} size="sm" />
             <div className="relative flex-1">
               <textarea

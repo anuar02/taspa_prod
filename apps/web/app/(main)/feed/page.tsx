@@ -6,112 +6,122 @@ import { TopBar } from "@/components/layout/TopBar";
 import { PhotoGrid } from "@/components/photo/PhotoGrid";
 import { api } from "@/lib/api";
 import { Photo } from "@/lib/types";
-import { useFeedStore } from "@/store/feedStore";
+import { useFeedStore, FeedTabKey } from "@/store/feedStore";
 
-const tabs = [
-  { key: "all", label: "Барлығы" },
-  { key: "popular", label: "Танымал" },
-  { key: "following", label: "Ұйымшан" }
+const TABS = [
+  { key: "all" as FeedTabKey, label: "Барлығы" },
+  { key: "popular" as FeedTabKey, label: "Танымал" },
+  { key: "following" as FeedTabKey, label: "Ұйымшан" },
 ];
 
 export default function FeedPage() {
-  const { items, page, setItems, appendItems, hasMore } = useFeedStore();
-  const [tab, setTab] = useState("all");
+  const { tabs: tabData, setTabItems, appendTabItems } = useFeedStore();
+  const [tab, setTab] = useState<FeedTabKey>("all");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const sentinelRef = useRef<HTMLDivElement | null>(null);
   const inFlightRef = useRef(false);
-  const loadedPagesRef = useRef<Set<number>>(new Set());
-  const requestedPagesRef = useRef<Set<string>>(new Set());
-  const initialLoadKeyRef = useRef<string | null>(null);
+  const requestedRef = useRef(new Set<string>());
 
+  const current = tabData[tab];
+
+  // Initial load / stale-while-revalidate per tab
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-    loadedPagesRef.current = new Set();
+    requestedRef.current = new Set();
     inFlightRef.current = false;
-    requestedPagesRef.current = new Set();
 
-    const initialKey = `${tab}-1`;
+    const { tabs, isStale } = useFeedStore.getState();
+    const snap = tabs[tab];
 
-    if (initialLoadKeyRef.current === initialKey) {
+    // Fresh data — show immediately, no fetch needed
+    if (!isStale(tab) && snap.items.length > 0) {
+      setLoading(false);
+      setError("");
       return;
     }
 
-    initialLoadKeyRef.current = initialKey;
-    requestedPagesRef.current.add(initialKey);
+    const key = `${tab}-1`;
+    requestedRef.current.add(key);
 
-    async function loadInitial() {
+    const isBackground = snap.items.length > 0; // stale-while-revalidate
+
+    async function load() {
       inFlightRef.current = true;
-      setLoading(true);
+      if (!isBackground) setLoading(true);
       setError("");
       try {
         const { data } = await api.get<{ items: Photo[] }>("/photos", {
-          params: { tab, page: 1, limit: 12 }
+          params: { tab, page: 1, limit: 12 },
         });
-        setItems(data.items, 1);
-        loadedPagesRef.current.add(1);
+        setTabItems(tab, data.items, 1);
       } catch {
-        setError("Лента жүктелмеді. Байланысты тексеріңіз.");
-        requestedPagesRef.current.delete(initialKey);
+        requestedRef.current.delete(key);
+        if (!isBackground) setError("Лента жүктелмеді. Байланысты тексеріңіз.");
       } finally {
         inFlightRef.current = false;
         setLoading(false);
       }
     }
 
-    void loadInitial();
-  }, [setItems, tab]);
+    void load();
+  }, [tab, setTabItems]);
 
+  // Infinite scroll sentinel
   useEffect(() => {
     const observer = new IntersectionObserver(async (entries) => {
       const entry = entries[0];
-      const nextPage = page + 1;
-      const requestKey = `${tab}-${nextPage}`;
+      const { tabs: td } = useFeedStore.getState();
+      const snap = td[tab];
+      const nextPage = snap.page + 1;
+      const key = `${tab}-${nextPage}`;
 
       if (
         !entry?.isIntersecting ||
         loading ||
-        !hasMore ||
+        !snap.hasMore ||
+        snap.items.length === 0 ||
         inFlightRef.current ||
-        loadedPagesRef.current.has(nextPage) ||
-        requestedPagesRef.current.has(requestKey)
+        requestedRef.current.has(key)
       ) {
         return;
       }
 
-      requestedPagesRef.current.add(requestKey);
+      requestedRef.current.add(key);
       inFlightRef.current = true;
       setLoading(true);
       try {
         const { data } = await api.get<{ items: Photo[] }>("/photos", {
-          params: { tab, page: nextPage, limit: 12 }
+          params: { tab, page: nextPage, limit: 12 },
         });
-        appendItems(data.items, nextPage);
-        loadedPagesRef.current.add(nextPage);
+        appendTabItems(tab, data.items, nextPage);
       } catch {
-        requestedPagesRef.current.delete(requestKey);
+        requestedRef.current.delete(key);
       } finally {
         inFlightRef.current = false;
         setLoading(false);
       }
     });
 
-    if (sentinelRef.current) {
-      observer.observe(sentinelRef.current);
-    }
-
+    if (sentinelRef.current) observer.observe(sentinelRef.current);
     return () => observer.disconnect();
-  }, [appendItems, hasMore, loading, page, tab]);
+  }, [appendTabItems, current.hasMore, current.page, loading, tab]);
+
+  function handleTabChange(key: FeedTabKey) {
+    if (key === tab) return;
+    setError("");
+    setTab(key);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
 
   return (
     <main>
       <TopBar title="Лента" subtitle="Соңғы фотолар мен танымал сәттер" />
       <div className="mb-5 flex gap-2 overflow-auto pb-2">
-        {tabs.map((item) => (
+        {TABS.map((item) => (
           <button
             key={item.key}
             type="button"
-            onClick={() => setTab(item.key)}
+            onClick={() => handleTabChange(item.key)}
             className={`rounded-full px-4 py-2 text-sm font-medium ${
               tab === item.key ? "bg-primary text-white" : "bg-white text-muted shadow-card"
             }`}
@@ -122,7 +132,7 @@ export default function FeedPage() {
       </div>
       {error ? (
         <p className="mt-8 text-center text-sm text-danger">{error}</p>
-      ) : loading && items.length === 0 ? (
+      ) : loading && current.items.length === 0 ? (
         <div className="columns-2 gap-4 md:columns-3 lg:columns-4 xl:columns-5 2xl:columns-6 [@media(min-width:1800px)]:columns-7 [@media(min-width:2200px)]:columns-8">
           {Array.from({ length: 8 }).map((_, index) => (
             <div
@@ -133,9 +143,15 @@ export default function FeedPage() {
         </div>
       ) : (
         <>
-          <PhotoGrid items={items} />
+          <PhotoGrid items={current.items} />
           <div ref={sentinelRef} className="py-8 text-center text-sm text-muted">
-            {loading ? "Жүктелуде..." : hasMore ? "Көбірек көрсету" : items.length > 0 ? "Фото аяқталды" : ""}
+            {loading
+              ? "Жүктелуде..."
+              : current.hasMore
+                ? "Көбірек көрсету"
+                : current.items.length > 0
+                  ? "Фото аяқталды"
+                  : ""}
           </div>
         </>
       )}

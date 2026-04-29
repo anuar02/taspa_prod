@@ -17,6 +17,7 @@ export type Photo = {
   commentsCount: number;
   saves?: string[];
   likes?: string[];
+  isPrivate?: boolean;
   author: Author;
 };
 

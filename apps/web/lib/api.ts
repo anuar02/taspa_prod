@@ -26,6 +26,14 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+function clearSessionAndRedirect() {
+  window.localStorage.removeItem("taspa.accessToken");
+  window.localStorage.removeItem("taspa.refreshToken");
+  if (!window.location.pathname.startsWith("/login") && !window.location.pathname.startsWith("/register")) {
+    window.location.href = "/login";
+  }
+}
+
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
@@ -41,24 +49,30 @@ api.interceptors.response.use(
       const refreshToken = window.localStorage.getItem("taspa.refreshToken");
 
       if (!refreshToken) {
+        clearSessionAndRedirect();
         return Promise.reject(error);
       }
 
-      const refreshResponse = await axios.post(
-        `${apiBaseUrl}/auth/refresh`,
-        { refreshToken }
-      );
+      try {
+        const refreshResponse = await axios.post(
+          `${apiBaseUrl}/auth/refresh`,
+          { refreshToken }
+        );
 
-      window.localStorage.setItem("taspa.accessToken", refreshResponse.data.accessToken);
-      window.localStorage.setItem("taspa.refreshToken", refreshResponse.data.refreshToken);
+        window.localStorage.setItem("taspa.accessToken", refreshResponse.data.accessToken);
+        window.localStorage.setItem("taspa.refreshToken", refreshResponse.data.refreshToken);
 
-      const headers =
-        originalRequest.headers instanceof AxiosHeaders
-          ? originalRequest.headers
-          : new AxiosHeaders(originalRequest.headers);
-      headers.set("Authorization", `Bearer ${refreshResponse.data.accessToken}`);
-      originalRequest.headers = headers;
-      return api(originalRequest);
+        const headers =
+          originalRequest.headers instanceof AxiosHeaders
+            ? originalRequest.headers
+            : new AxiosHeaders(originalRequest.headers);
+        headers.set("Authorization", `Bearer ${refreshResponse.data.accessToken}`);
+        originalRequest.headers = headers;
+        return api(originalRequest);
+      } catch {
+        clearSessionAndRedirect();
+        return Promise.reject(error);
+      }
     }
 
     return Promise.reject(error);

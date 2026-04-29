@@ -1,8 +1,11 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+
+import { api } from "@/lib/api";
 
 const mosaic = [
   "aspect-[3/4]", "aspect-square", "aspect-[2/3]",
@@ -11,34 +14,82 @@ const mosaic = [
   "aspect-[3/4]", "aspect-square", "aspect-[3/4]",
 ];
 
+type SplashPhoto = {
+  id: string;
+  imageUrl: string;
+  alt: string;
+  photographer: string;
+  photographerUrl: string;
+};
+
 export default function SplashPage() {
   const router = useRouter();
+  const [photos, setPhotos] = useState<SplashPhoto[]>([]);
 
   useEffect(() => {
     const accessToken = window.localStorage.getItem("taspa.accessToken");
 
     if (accessToken) {
       router.replace("/feed");
+      return;
     }
+
+    const controller = new AbortController();
+
+    api
+      .get<{ items: SplashPhoto[] }>("/search/splash", {
+        signal: controller.signal
+      })
+      .then((response) => {
+        setPhotos(response.data.items.slice(0, mosaic.length));
+      })
+      .catch(() => {
+        setPhotos([]);
+      });
+
+    return () => controller.abort();
   }, [router]);
 
   return (
     <main
       className="relative flex min-h-[100dvh] flex-col overflow-hidden"
-      style={{ background: "linear-gradient(135deg, #3b0764 0%, #5B21B6 60%, #2e1065 100%)" }}
+      style={{ background: "linear-gradient(155deg, #4c0519 0%, #E11D48 55%, #9f1239 100%)" }}
     >
       {/* photo mosaic */}
       <div className="pointer-events-none absolute inset-0 p-6 opacity-[0.1]">
         <div className="columns-3 gap-3 [&>*]:mb-3 sm:columns-4">
-          {mosaic.map((aspect, i) => (
-            <div key={i} className={`break-inside-avoid rounded-2xl bg-white ${aspect}`} />
-          ))}
+          {mosaic.map((aspect, i) => {
+            const photo = photos[i];
+
+            return (
+              <div
+                key={i}
+                className={`relative break-inside-avoid overflow-hidden rounded-2xl bg-white/20 ${aspect}`}
+              >
+                {photo ? (
+                  <>
+                    <Image
+                      src={photo.imageUrl}
+                      alt={photo.alt}
+                      fill
+                      priority={i < 4}
+                      sizes="(min-width: 640px) 24vw, 32vw"
+                      className="object-cover"
+                    />
+                    <div className="absolute inset-0 bg-[#4c0519]/15" />
+                  </>
+                ) : (
+                  <div className="h-full w-full bg-white" />
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
 
       {/* bottom vignette */}
       <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-3/4"
-        style={{ background: "linear-gradient(to top, rgba(30,7,80,0.85) 0%, transparent 100%)" }}
+        style={{ background: "linear-gradient(to top, rgba(76,5,25,0.88) 0%, transparent 100%)" }}
       />
 
       {/* header */}
@@ -57,6 +108,9 @@ export default function SplashPage() {
           </h1>
           <p className="text-base leading-relaxed text-white/55">
             Табиғат, қала, портрет және өнер сәттерін қазақ тілінде бөлісіңіз.
+          </p>
+          <p className="text-xs uppercase tracking-[0.18em] text-white/35">
+            Фон суреттері Pexels арқылы.
           </p>
         </div>
 

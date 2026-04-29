@@ -1,6 +1,11 @@
 import { Request, Response } from "express";
 
 import { PhotoModel } from "../models/Photo.model.js";
+import {
+  curatedPexelsPhotos,
+  searchPexelsPhotos,
+  type PexelsPhoto
+} from "../services/pexels.service.js";
 import { UserModel } from "../models/User.model.js";
 
 const categoryPreview = [
@@ -12,12 +17,32 @@ const categoryPreview = [
   { key: "OTHER", label: "Басқа" }
 ];
 
+const splashQueries = [
+  "nature landscape",
+  "city night",
+  "portrait editorial",
+  "minimal art"
+];
+
 function resolveCategoryQuery(query: string) {
   const normalized = query.trim().toLowerCase();
   const match = categoryPreview.find(
     (item) => item.key.toLowerCase() === normalized || item.label.toLowerCase() === normalized
   );
   return match?.key;
+}
+
+function uniquePexelsById(photos: PexelsPhoto[]) {
+  const seen = new Set<number>();
+
+  return photos.filter((photo) => {
+    if (seen.has(photo.id)) {
+      return false;
+    }
+
+    seen.add(photo.id);
+    return true;
+  });
 }
 
 export async function search(request: Request, response: Response) {
@@ -70,6 +95,38 @@ export async function search(request: Request, response: Response) {
     .limit(limit);
 
   return response.json({ items: photos });
+}
+
+export async function splash(_request: Request, response: Response) {
+  try {
+    const searchResults = await Promise.all(
+      splashQueries.map((query) => searchPexelsPhotos(query, 4, 1))
+    );
+    const curated = await curatedPexelsPhotos(8, 1);
+
+    const items = uniquePexelsById([
+      ...searchResults.flatMap((result) => result.photos),
+      ...curated.photos
+    ])
+      .slice(0, 12)
+      .map((photo) => ({
+        id: String(photo.id),
+        imageUrl:
+          photo.src.medium ??
+          photo.src.large ??
+          photo.src.portrait ??
+          photo.src.small ??
+          photo.src.original,
+        alt: photo.alt?.trim() || `Photo by ${photo.photographer}`,
+        photographer: photo.photographer,
+        photographerUrl: photo.photographer_url
+      }));
+
+    return response.json({ items });
+  } catch (error) {
+    console.error("Splash photo fetch failed", error);
+    return response.json({ items: [] });
+  }
 }
 
 export async function categories(_request: Request, response: Response) {

@@ -52,8 +52,13 @@ const mosaic = [
 ];
 
 function BrandPanel() {
+  const year = new Date().getFullYear();
+
   return (
-    <div className="relative hidden overflow-hidden lg:flex lg:w-[45%] lg:flex-col lg:justify-between lg:px-12 lg:py-12" style={{ background: "linear-gradient(135deg, #3b0764 0%, #5B21B6 50%, #2e1065 100%)" }}>
+    <div
+      className="relative hidden overflow-hidden lg:flex lg:w-[45%] lg:flex-col lg:justify-between lg:px-12 lg:py-12"
+      style={{ background: "linear-gradient(145deg, #4c0519 0%, #9f1239 45%, #e11d48 100%)" }}
+    >
       {/* mosaic */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden p-10 opacity-[0.16]">
         <div className="auth-mosaic-scroll columns-3 gap-3 [&>*]:mb-3">
@@ -93,7 +98,7 @@ function BrandPanel() {
       </div>
 
       {/* footer */}
-      <p className="relative z-10 text-xs text-white/30">© 2025 Taspa</p>
+      <p className="relative z-10 text-xs text-white/30">© {year} Taspa</p>
     </div>
   );
 }
@@ -105,7 +110,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
       <div className="relative flex min-h-[100dvh] flex-1 flex-col items-center justify-center overflow-hidden bg-bg px-6 py-12">
         <div
           className="pointer-events-none absolute inset-0 overflow-hidden lg:hidden"
-          style={{ background: "linear-gradient(180deg, #f5f3ff 0%, #ede9fe 45%, #f8f7f4 100%)" }}
+          style={{ background: "linear-gradient(180deg, #fff1f2 0%, #ffe4e6 45%, #f8f7f4 100%)" }}
         >
           <div className="auth-mosaic-scroll columns-3 gap-2 p-4 opacity-[0.16] [&>*]:mb-2">
             {[...mosaic, ...mosaic].map((item, i) => (
@@ -121,7 +126,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
               </div>
             ))}
           </div>
-          <div className="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-[#f5f3ff] via-[#f5f3ff]/95 to-transparent" />
+          <div className="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-[#fff1f2] via-[#fff1f2]/95 to-transparent" />
           <div className="absolute inset-x-0 bottom-0 h-56 bg-gradient-to-t from-[#f8f7f4] via-[#f8f7f4]/96 to-transparent" />
         </div>
         <div className="relative z-10 w-full max-w-sm rounded-[28px] bg-white/84 p-6 shadow-[0_20px_70px_rgba(28,25,23,0.08)] backdrop-blur-sm sm:p-8 lg:rounded-none lg:bg-transparent lg:p-0 lg:shadow-none lg:backdrop-blur-0">

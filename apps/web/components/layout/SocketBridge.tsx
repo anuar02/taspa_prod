@@ -4,7 +4,7 @@ import { useEffect } from "react";
 
 import { api } from "@/lib/api";
 import { socket } from "@/lib/socket";
-import { useAuthStore } from "@/store/authStore";
+import { AuthUser, useAuthStore } from "@/store/authStore";
 import { useNotificationStore } from "@/store/notificationStore";
 
 type SocketNotification = {
@@ -40,7 +40,7 @@ export function SocketBridge() {
     if (!accessToken) return;
 
     api
-      .get<{ user: { _id: string; username: string; email: string; displayName: string } | null }>("/auth/me")
+      .get<{ user: AuthUser | null }>("/auth/me")
       .then(({ data }) => {
         if (data.user) {
           setSession({ user: data.user, accessToken, refreshToken: refreshToken ?? "" });

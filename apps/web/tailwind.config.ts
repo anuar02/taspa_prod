@@ -13,8 +13,8 @@ const config: Config = {
         sans: ["Outfit", "system-ui", "sans-serif"]
       },
       colors: {
-        primary: "#5B21B6",
-        "primary-light": "#8B5CF6",
+        primary: "#E11D48",
+        "primary-light": "#FB7185",
         bg: "#F8F7F4",
         surface: "#FFFFFF",
         text: "#1C1917",
