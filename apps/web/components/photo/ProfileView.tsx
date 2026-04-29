@@ -9,11 +9,13 @@ import {
   Check,
   Grid3X3,
   Lock,
+  LogOut,
   Settings,
   UserCheck,
   UserPlus,
 } from "lucide-react";
 import axios from "axios";
+import { useRouter } from "next/navigation";
 
 import { ProfileConnectionKind, ProfileConnectionsDialog } from "@/components/photo/ProfileConnectionsDialog";
 import { ProfileMediaGrid } from "@/components/photo/ProfileMediaGrid";
@@ -106,9 +108,16 @@ function ProfileStatButton({
 }
 
 export function ProfileView({ username }: { username: string }) {
+  const router = useRouter();
   const authUser = useAuthStore((state) => state.user);
   const updateUser = useAuthStore((state) => state.updateUser);
+  const clearSession = useAuthStore((state) => state.clearSession);
   const isOwn = authUser?.username === username;
+
+  function handleLogout() {
+    clearSession();
+    router.push("/login");
+  }
 
   const { items: savedItems, setItems: setSavedItems } = useSavedStore();
   const { setEntry } = useProfileStore();
@@ -420,14 +429,24 @@ export function ProfileView({ username }: { username: string }) {
         <div className="flex items-center justify-between px-4 py-3 sm:px-6">
           <h1 className="text-base font-bold text-text">{profile.username}</h1>
           {isOwn && !editing ? (
-            <button
-              type="button"
-              onClick={startEdit}
-              aria-label="Баптаулар"
-              className="rounded-full p-1 text-text transition hover:bg-border/60 active:scale-95"
-            >
-              <Settings size={20} />
-            </button>
+            <div className="flex items-center gap-1">
+              <button
+                type="button"
+                onClick={startEdit}
+                aria-label="Баптаулар"
+                className="rounded-full p-2 text-text transition hover:bg-border/60 active:scale-95"
+              >
+                <Settings size={20} />
+              </button>
+              <button
+                type="button"
+                onClick={handleLogout}
+                aria-label="Шығу"
+                className="rounded-full p-2 text-muted transition hover:bg-border/60 hover:text-danger active:scale-95"
+              >
+                <LogOut size={20} />
+              </button>
+            </div>
           ) : null}
         </div>
 

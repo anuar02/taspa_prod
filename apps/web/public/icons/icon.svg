@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="112" fill="#1a1a1a"/>
+  <!-- T crossbar -->
+  <rect x="80" y="116" width="352" height="68" rx="10" fill="#f5f3ef"/>
+  <!-- T stem -->
+  <rect x="222" y="184" width="68" height="212" rx="10" fill="#f5f3ef"/>
+</svg>

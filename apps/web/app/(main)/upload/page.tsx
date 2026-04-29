@@ -1,6 +1,6 @@
 "use client";
 
-import { ChangeEvent, DragEvent, FormEvent, useEffect, useRef, useState } from "react";
+import { ChangeEvent, DragEvent, FormEvent, useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import {
   ArrowLeft,
@@ -12,6 +12,7 @@ import {
   Images,
   Lock,
   MapPin,
+  SwitchCamera,
   Tags,
   Trash2,
   UploadCloud,
@@ -54,7 +55,9 @@ function normalizeTags(value: string) {
 export default function UploadPage() {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const cameraInputRef = useRef<HTMLInputElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const streamRef = useRef<MediaStream | null>(null);
 
   const [step, setStep] = useState<StepId>(1);
   const [file, setFile] = useState<File | null>(null);
@@ -67,17 +70,49 @@ export default function UploadPage() {
   const [isDragging, setIsDragging] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [isMobile, setIsMobile] = useState(false);
+  const [facing, setFacing] = useState<"environment" | "user">("environment");
+  const [cameraError, setCameraError] = useState(false);
 
   const parsedTags = normalizeTags(tags);
   const hasImage = Boolean(file && preview);
   const activeCategory = categories.find((item) => item.key === category);
 
-  useEffect(() => {
-    const isMobile = window.matchMedia("(max-width: 639px)").matches;
-    if (isMobile) {
-      cameraInputRef.current?.click();
-    }
+  const stopCamera = useCallback(() => {
+    streamRef.current?.getTracks().forEach((t) => t.stop());
+    streamRef.current = null;
+    if (videoRef.current) videoRef.current.srcObject = null;
   }, []);
+
+  const startCamera = useCallback(async (facingMode: "environment" | "user" = "environment") => {
+    stopCamera();
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode, width: { ideal: 1920 }, height: { ideal: 1080 } },
+        audio: false,
+      });
+      streamRef.current = stream;
+      if (videoRef.current) videoRef.current.srcObject = stream;
+      setCameraError(false);
+    } catch {
+      setCameraError(true);
+    }
+  }, [stopCamera]);
+
+  useEffect(() => {
+    const mobile = window.matchMedia("(max-width: 639px)").matches;
+    setIsMobile(mobile);
+  }, []);
+
+  useEffect(() => {
+    if (!isMobile) return;
+    if (step === 1) {
+      startCamera(facing);
+    } else {
+      stopCamera();
+    }
+    return () => stopCamera();
+  }, [isMobile, step]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     return () => {
@@ -91,7 +126,25 @@ export default function UploadPage() {
     setPreview("");
     setStep(1);
     if (fileInputRef.current) fileInputRef.current.value = "";
-    if (cameraInputRef.current) cameraInputRef.current.value = "";
+  }
+
+  function capturePhoto() {
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    if (!video || !canvas) return;
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    canvas.getContext("2d")?.drawImage(video, 0, 0);
+    canvas.toBlob((blob) => {
+      if (!blob) return;
+      applyFile(new File([blob], "photo.jpg", { type: "image/jpeg" }));
+    }, "image/jpeg", 0.92);
+  }
+
+  function flipCamera() {
+    const next = facing === "environment" ? "user" : "environment";
+    setFacing(next);
+    startCamera(next);
   }
 
   function applyFile(nextFile: File | null) {
@@ -171,7 +224,7 @@ export default function UploadPage() {
 
   return (
     <main>
-      {/* hidden file inputs */}
+      {/* hidden file input for gallery */}
       <input
         ref={fileInputRef}
         type="file"
@@ -179,14 +232,8 @@ export default function UploadPage() {
         onChange={handleFileChange}
         className="hidden"
       />
-      <input
-        ref={cameraInputRef}
-        type="file"
-        accept="image/*"
-        capture="environment"
-        onChange={handleFileChange}
-        className="hidden"
-      />
+      {/* hidden canvas for photo capture */}
+      <canvas ref={canvasRef} className="hidden" />
 
       {/* step indicator — only shown on step 2+ */}
       {step > 1 && (
@@ -254,30 +301,59 @@ export default function UploadPage() {
               </span>
             </div>
 
-            {/* mobile: full-screen camera trigger + gallery fallback */}
-            <div className="flex flex-col items-center gap-6 sm:hidden">
-              <button
-                type="button"
-                onClick={() => cameraInputRef.current?.click()}
-                className="flex min-h-[calc(100dvh-16rem)] w-full flex-col items-center justify-center gap-5 rounded-[32px] bg-primary px-6 py-10 text-white shadow-card active:scale-[0.98]"
-              >
-                <div className="flex h-20 w-20 items-center justify-center rounded-3xl bg-white/20">
-                  <Camera size={40} />
+            {/* mobile: live camera view */}
+            <div className="relative overflow-hidden rounded-[32px] bg-black sm:hidden" style={{ height: "calc(100dvh - 8rem)" }}>
+              {!cameraError ? (
+                <>
+                  <video
+                    ref={videoRef}
+                    autoPlay
+                    playsInline
+                    muted
+                    className="h-full w-full object-cover"
+                  />
+                  {/* bottom controls */}
+                  <div className="absolute inset-x-0 bottom-0 flex items-center justify-between px-8 pb-10 pt-16 bg-gradient-to-t from-black/70 to-transparent">
+                    {/* gallery */}
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/20 text-white backdrop-blur-sm active:scale-95"
+                    >
+                      <Images size={22} />
+                    </button>
+                    {/* shutter */}
+                    <button
+                      type="button"
+                      onClick={capturePhoto}
+                      className="flex h-20 w-20 items-center justify-center rounded-full border-4 border-white transition active:scale-95"
+                    >
+                      <div className="h-16 w-16 rounded-full bg-white" />
+                    </button>
+                    {/* flip */}
+                    <button
+                      type="button"
+                      onClick={flipCamera}
+                      className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/20 text-white backdrop-blur-sm active:scale-95"
+                    >
+                      <SwitchCamera size={22} />
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <div className="flex h-full flex-col items-center justify-center gap-4 px-6 text-center text-white">
+                  <Camera size={40} className="opacity-40" />
+                  <p className="font-semibold">Камераға рұқсат берілмеді</p>
+                  <p className="text-sm text-white/60">Браузер баптауларынан рұқсат беріңіз</p>
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="mt-2 rounded-full bg-white/20 px-6 py-3 text-sm font-medium backdrop-blur-sm active:scale-95"
+                  >
+                    Галереядан таңдау
+                  </button>
                 </div>
-                <div className="text-center">
-                  <p className="text-xl font-bold">Камераны ашу</p>
-                  <p className="mt-1 text-sm text-white/70">Фото түсіру үшін басыңыз</p>
-                </div>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => fileInputRef.current?.click()}
-                className="flex items-center gap-2 text-sm font-medium text-muted active:text-primary"
-              >
-                <Images size={16} />
-                Галереядан таңдау
-              </button>
+              )}
             </div>
           </section>
         )}
