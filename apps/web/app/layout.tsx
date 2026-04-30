@@ -7,9 +7,12 @@ export const metadata: Metadata = {
   title: "TASPA",
   description: "Әр сурет — бір тарих",
   manifest: "/manifest.json",
+  icons: {
+    apple: "/apple-touch-icon.png",
+  },
   appleWebApp: {
     capable: true,
-    statusBarStyle: "default",
+    statusBarStyle: "black",
     title: "TASPA",
   },
 };
@@ -25,9 +28,6 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="kk">
-      <head>
-        <link rel="apple-touch-icon" href="/icons/icon-192.png" />
-      </head>
       <body>
         <SocketBridge />
         <NotificationTray />
