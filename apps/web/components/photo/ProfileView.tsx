@@ -678,38 +678,44 @@ export function ProfileView({ username }: { username: string }) {
         </div>
       </div>
 
-      <div className="flex justify-center border-t border-border">
+      <div className="flex border-t border-border">
         <button
           type="button"
           onClick={() => setTab("posts")}
-          className={`flex min-w-[80px] items-center justify-center gap-2 py-[11px] text-xs font-semibold uppercase tracking-widest transition lg:min-w-[100px] ${
-            tab === "posts" ? "-mt-px border-t border-text text-text" : "text-muted/60 hover:text-muted"
+          className={`flex flex-1 flex-col items-center gap-1.5 border-b-2 py-4 transition-colors ${
+            tab === "posts"
+              ? "border-text text-text"
+              : "border-transparent text-muted/50 hover:text-muted"
           }`}
         >
-          <Grid3X3 size={14} strokeWidth={tab === "posts" ? 2.5 : 1.5} />
-          <span className="hidden sm:inline">Посттар</span>
+          <Grid3X3 size={20} strokeWidth={tab === "posts" ? 2 : 1.5} />
+          <span className="text-[11px] font-semibold uppercase tracking-widest">Посттар</span>
         </button>
         {isOwn ? (
           <>
             <button
               type="button"
               onClick={() => setTab("saved")}
-              className={`flex min-w-[80px] items-center justify-center gap-2 py-[11px] text-xs font-semibold uppercase tracking-widest transition lg:min-w-[100px] ${
-                tab === "saved" ? "-mt-px border-t border-text text-text" : "text-muted/60 hover:text-muted"
+              className={`flex flex-1 flex-col items-center gap-1.5 border-b-2 py-4 transition-colors ${
+                tab === "saved"
+                  ? "border-text text-text"
+                  : "border-transparent text-muted/50 hover:text-muted"
               }`}
             >
-              <Bookmark size={14} strokeWidth={tab === "saved" ? 2.5 : 1.5} />
-              <span className="hidden sm:inline">Сақталған</span>
+              <Bookmark size={20} strokeWidth={tab === "saved" ? 2 : 1.5} />
+              <span className="text-[11px] font-semibold uppercase tracking-widest">Сақталған</span>
             </button>
             <button
               type="button"
               onClick={() => setTab("private")}
-              className={`flex min-w-[80px] items-center justify-center gap-2 py-[11px] text-xs font-semibold uppercase tracking-widest transition lg:min-w-[100px] ${
-                tab === "private" ? "-mt-px border-t border-text text-text" : "text-muted/60 hover:text-muted"
+              className={`flex flex-1 flex-col items-center gap-1.5 border-b-2 py-4 transition-colors ${
+                tab === "private"
+                  ? "border-text text-text"
+                  : "border-transparent text-muted/50 hover:text-muted"
               }`}
             >
-              <Lock size={14} strokeWidth={tab === "private" ? 2.5 : 1.5} />
-              <span className="hidden sm:inline">Жеке</span>
+              <Lock size={20} strokeWidth={tab === "private" ? 2 : 1.5} />
+              <span className="text-[11px] font-semibold uppercase tracking-widest">Жеке</span>
             </button>
           </>
         ) : null}
