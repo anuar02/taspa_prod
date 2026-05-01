@@ -44,7 +44,11 @@ export async function createComment(request: Request, response: Response) {
     parentComment: request.body.parentComment ?? null
   });
 
-  await PhotoModel.findByIdAndUpdate(request.params.photoId, { $inc: { commentsCount: 1 } });
+  const updatedPhoto = await PhotoModel.findByIdAndUpdate(
+    request.params.photoId,
+    { $inc: { commentsCount: 1 } },
+    { new: true }
+  );
 
   if (photo.author.toString() !== userId) {
     const notification = await NotificationModel.create({
@@ -59,7 +63,7 @@ export async function createComment(request: Request, response: Response) {
 
   const populated = await comment.populate("author", "username displayName avatarUrl");
 
-  return response.status(201).json({ item: populated });
+  return response.status(201).json({ item: populated, commentsCount: updatedPhoto?.commentsCount ?? 0 });
 }
 
 export async function deleteComment(request: Request, response: Response) {
@@ -69,14 +73,33 @@ export async function deleteComment(request: Request, response: Response) {
     return sendError(response, 404, "Comment not found");
   }
 
-  if (comment.author.toString() !== request.user?.id) {
+  const photo = await PhotoModel.findById(comment.photo);
+
+  if (!photo) {
+    return sendError(response, 404, "Photo not found");
+  }
+
+  const isCommentAuthor = comment.author.toString() === request.user?.id;
+  const isPhotoAuthor = photo.author.toString() === request.user?.id;
+
+  if (!isCommentAuthor && !isPhotoAuthor) {
     return sendError(response, 403, "Forbidden");
   }
 
   await comment.deleteOne();
-  await PhotoModel.findByIdAndUpdate(comment.photo, { $inc: { commentsCount: -1 } });
+  const updatedPhoto = await PhotoModel.findByIdAndUpdate(
+    comment.photo,
+    { $inc: { commentsCount: -1 } },
+    { new: true }
+  );
+  const commentsCount = Math.max(0, updatedPhoto?.commentsCount ?? 0);
 
-  return response.status(204).send();
+  if (updatedPhoto && updatedPhoto.commentsCount < 0) {
+    updatedPhoto.commentsCount = 0;
+    await updatedPhoto.save();
+  }
+
+  return response.json({ commentsCount });
 }
 
 export async function toggleCommentLike(request: Request, response: Response) {

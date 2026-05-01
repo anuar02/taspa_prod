@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -117,7 +118,11 @@ export function RegisterForm() {
           className="mt-0.5 h-4 w-4 shrink-0 accent-primary"
         />
         <span className="text-sm text-muted">
-          <span className="text-text">Қолданушы шарттарымен</span> келісемін
+          <span className="text-text">Қолданушы шарттары және </span>
+          <Link href="/privacy-policy" className="font-medium text-primary hover:underline">
+            құпиялық саясатымен
+          </Link>{" "}
+          келісемін
         </span>
       </label>
 
@@ -132,7 +137,7 @@ export function RegisterForm() {
         disabled={isSubmitting}
         className="w-full rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-primary-light disabled:opacity-60"
       >
-        {isSubmitting ? "Жасалуда..." : "Аккаунт жасау"}
+        {isSubmitting ? "Жасалуда..." : "Аккаунт құру"}
       </button>
     </form>
   );

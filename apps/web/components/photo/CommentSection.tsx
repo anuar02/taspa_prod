@@ -2,7 +2,7 @@
 
 import { FormEvent, useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { ArrowUp, MessageCircle } from "lucide-react";
+import { ArrowUp, MessageCircle, Trash2 } from "lucide-react";
 
 import { api } from "@/lib/api";
 import { Comment } from "@/lib/types";
@@ -63,14 +63,29 @@ function Avatar({ name, username, size = "md" }: { name: string; username: strin
 
 // ─── main component ──────────────────────────────────────────────────────────
 
-export function CommentSection({ photoId, commentsCount }: { photoId: string; commentsCount: number }) {
+export function CommentSection({
+  photoId,
+  photoAuthorId,
+  commentsCount,
+  onCountChange
+}: {
+  photoId: string;
+  photoAuthorId?: string;
+  commentsCount: number;
+  onCountChange?: (count: number) => void;
+}) {
   const user = useAuthStore((state) => state.user);
   const [comments, setComments] = useState<Comment[]>([]);
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const [error, setError] = useState("");
   const inputRef = useRef<HTMLTextAreaElement>(null);
+
+  function resolveCount(value: unknown, fallback: number) {
+    return typeof value === "number" && Number.isFinite(value) ? value : fallback;
+  }
 
   useEffect(() => {
     async function load() {
@@ -96,10 +111,11 @@ export function CommentSection({ photoId, commentsCount }: { photoId: string; co
     try {
       setSubmitting(true);
       setError("");
-      const { data } = await api.post<{ item: Comment }>(`/comments/photo/${photoId}`, {
+      const { data } = await api.post<{ item: Comment; commentsCount?: number }>(`/comments/photo/${photoId}`, {
         text: text.trim(),
       });
       setComments((prev) => [data.item, ...prev]);
+      onCountChange?.(resolveCount(data.commentsCount, commentsCount + 1));
       setText("");
       inputRef.current?.focus();
     } catch {
@@ -109,23 +125,46 @@ export function CommentSection({ photoId, commentsCount }: { photoId: string; co
     }
   }
 
-  const count = comments.length || commentsCount;
+  async function handleDelete(commentId: string) {
+    if (deletingId) return;
+
+    const previousComments = comments;
+    const nextComments = comments.filter((comment) => comment._id !== commentId);
+
+    try {
+      setDeletingId(commentId);
+      setError("");
+      setComments(nextComments);
+      onCountChange?.(Math.max(0, commentsCount - 1));
+
+      const { data } = await api.delete<{ commentsCount?: number }>(`/comments/${commentId}`);
+      onCountChange?.(resolveCount(data.commentsCount, Math.max(0, commentsCount - 1)));
+    } catch {
+      setComments(previousComments);
+      onCountChange?.(commentsCount);
+      setError("Пікірді өшіру мүмкін болмады");
+    } finally {
+      setDeletingId(null);
+    }
+  }
+
+  const count = resolveCount(commentsCount, comments.length);
 
   return (
-    <div className="flex flex-col">
+    <div className="overflow-hidden rounded-[28px] border border-border/70 bg-white shadow-card">
       {/* header */}
-      <div className="mb-4 flex items-center gap-2">
-        <MessageCircle size={15} className="text-muted" />
-        <span className="text-sm font-semibold text-text">Пікірлер</span>
-        {count > 0 && (
-          <span className="rounded-full bg-bg px-2 py-0.5 text-xs font-medium text-muted">
-            {count}
-          </span>
-        )}
+      <div className="flex items-center justify-between border-b border-border/60 px-4 py-3.5">
+        <div className="flex items-center gap-2">
+          <MessageCircle size={15} className="text-primary" />
+          <span className="text-sm font-semibold text-text">Пікірлер</span>
+        </div>
+        <span className="rounded-full bg-bg px-2.5 py-1 text-xs font-semibold text-muted">
+          {count}
+        </span>
       </div>
 
       {/* comment list */}
-      <div className="min-h-0 flex-1 space-y-0.5">
+      <div className="min-h-0 flex-1 px-4">
         {loading ? (
           <>
             <CommentSkeleton />
@@ -139,38 +178,58 @@ export function CommentSection({ photoId, commentsCount }: { photoId: string; co
             <p className="text-xs text-muted">Алғашқы пікірді жазыңыз</p>
           </div>
         ) : (
-          comments.map((comment, i) => (
+          comments.map((comment, i) => {
+            const canDelete = Boolean(
+              user?._id && (user._id === comment.author._id || user._id === photoAuthorId)
+            );
+
+            return (
             <article
               key={comment._id}
-              className={`flex gap-3 py-3 ${i < comments.length - 1 ? "border-b border-border/50" : ""}`}
+              className={`group flex gap-3 py-4 ${i < comments.length - 1 ? "border-b border-border/50" : ""}`}
             >
               <Avatar name={comment.author.displayName} username={comment.author.username} />
               <div className="min-w-0 flex-1">
-                <div className="flex items-baseline justify-between gap-2">
-                  <Link
-                    href={`/profile/${comment.author.username}`}
-                    className="text-sm font-semibold text-text hover:text-primary"
-                  >
-                    {comment.author.displayName}
-                  </Link>
-                  <span className="shrink-0 text-[11px] text-muted">{timeAgo(comment.createdAt)}</span>
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <Link
+                      href={`/profile/${comment.author.username}`}
+                      className="block truncate text-sm font-semibold text-text hover:text-primary"
+                    >
+                      {comment.author.displayName}
+                    </Link>
+                    <span className="text-[11px] text-muted">{timeAgo(comment.createdAt)}</span>
+                  </div>
+                  {canDelete ? (
+                    <button
+                      type="button"
+                      onClick={() => void handleDelete(comment._id)}
+                      disabled={deletingId === comment._id}
+                      className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-muted opacity-70 transition hover:bg-danger/10 hover:text-danger group-hover:opacity-100 disabled:opacity-30"
+                      aria-label="Пікірді өшіру"
+                      title="Пікірді өшіру"
+                    >
+                      <Trash2 size={13} />
+                    </button>
+                  ) : null}
                 </div>
-                <p className="mt-0.5 text-sm leading-relaxed text-muted">{comment.text}</p>
+                <p className="mt-1 text-sm leading-relaxed text-text">{comment.text}</p>
               </div>
             </article>
-          ))
+          );
+          })
         )}
       </div>
 
       {/* error */}
       {error ? (
-        <p className="mt-3 rounded-xl border border-danger/20 bg-danger/5 px-3 py-2 text-xs text-danger">
+        <p className="mx-4 mt-3 rounded-xl border border-danger/20 bg-danger/5 px-3 py-2 text-xs text-danger">
           {error}
         </p>
       ) : null}
 
       {/* input */}
-      <div className="mt-4 border-t border-border/50 pt-4">
+      <div className="mt-3 border-t border-border/60 bg-bg/50 p-4">
         {user ? (
           <form onSubmit={handleSubmit} className="flex gap-2.5">
             <Avatar name={user.displayName} username={user.username} size="sm" />

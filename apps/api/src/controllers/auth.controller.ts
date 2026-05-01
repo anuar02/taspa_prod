@@ -1,9 +1,12 @@
 import bcrypt from "bcryptjs";
+import crypto from "crypto";
 import { Request, Response } from "express";
 import { HydratedDocument } from "mongoose";
 
 import { IUser, UserModel } from "../models/User.model.js";
+import { env } from "../config/env.js";
 import { sendError } from "../utils/http.js";
+import { sendResetCode } from "../utils/email.js";
 import { signAccessToken, signRefreshToken, verifyRefreshToken } from "../utils/jwt.js";
 
 function sanitizeUser(user: HydratedDocument<IUser> | null) {
@@ -128,4 +131,118 @@ export async function logout(request: Request, response: Response) {
 export async function me(request: Request, response: Response) {
   const user = await UserModel.findById(request.user?.id);
   return response.json({ user: sanitizeUser(user) });
+}
+
+export async function forgotPassword(request: Request, response: Response) {
+  const { email } = request.body;
+
+  if (!email) {
+    return sendError(response, 400, "Email is required");
+  }
+
+  const user = await UserModel.findOne({ email: email.toLowerCase() });
+
+  if (!user) {
+    // Always 200 to avoid leaking which emails exist
+    if (env.nodeEnv !== "production") {
+      return response.json({ message: "ok", devAccountFound: false });
+    }
+
+    return response.json({ message: "ok" });
+  }
+
+  const code = String(Math.floor(1000 + Math.random() * 9000)); // 4-digit code
+  const hashedCode = crypto.createHash("sha256").update(code).digest("hex");
+
+  user.resetPasswordToken = hashedCode;
+  user.resetPasswordExpires = new Date(Date.now() + 15 * 60 * 1000); // 15 min
+  await user.save();
+
+  if (env.nodeEnv !== "production" && (!env.smtpUser || !env.smtpPass)) {
+    console.info(`Password reset code for ${user.email}: ${code}`);
+    return response.json({ message: "ok", devResetCode: code });
+  }
+
+  try {
+    await sendResetCode(user.email, code);
+  } catch (error) {
+    if (env.nodeEnv !== "production") {
+      // Keep the token so devResetCode can still be verified
+      console.error("[forgot-password] SMTP error:", (error as Error).message);
+      console.info(`[forgot-password] Dev code for ${user.email}: ${code}`);
+      return response.json({ message: "ok", devResetCode: code });
+    }
+
+    user.resetPasswordToken = "";
+    user.resetPasswordExpires = undefined;
+    await user.save();
+    return sendError(response, 500, "Failed to send email. Please try again later.");
+  }
+
+  if (env.nodeEnv !== "production") {
+    console.info(`[forgot-password] Email sent to ${user.email}, code: ${code}`);
+  }
+
+  return response.json({ message: "ok" });
+}
+
+export async function verifyResetCode(request: Request, response: Response) {
+  const { email, code } = request.body;
+
+  if (!email || !code) {
+    return sendError(response, 400, "Email and code are required");
+  }
+
+  const hashedCode = crypto.createHash("sha256").update(code).digest("hex");
+
+  const user = await UserModel.findOne({
+    email: email.toLowerCase(),
+    resetPasswordToken: hashedCode,
+    resetPasswordExpires: { $gt: new Date() }
+  });
+
+  if (!user) {
+    return sendError(response, 400, "Code is invalid or has expired");
+  }
+
+  // Replace the OTP hash with a new reset token for the password step
+  const rawResetToken = crypto.randomBytes(32).toString("hex");
+  const hashedResetToken = crypto.createHash("sha256").update(rawResetToken).digest("hex");
+
+  user.resetPasswordToken = hashedResetToken;
+  user.resetPasswordExpires = new Date(Date.now() + 15 * 60 * 1000);
+  await user.save();
+
+  return response.json({ resetToken: rawResetToken });
+}
+
+export async function resetPassword(request: Request, response: Response) {
+  const { token, password } = request.body;
+
+  if (!token || !password) {
+    return sendError(response, 400, "Token and password are required");
+  }
+
+  if (password.length < 8) {
+    return sendError(response, 400, "Password must be at least 8 characters");
+  }
+
+  const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
+
+  const user = await UserModel.findOne({
+    resetPasswordToken: hashedToken,
+    resetPasswordExpires: { $gt: new Date() }
+  });
+
+  if (!user) {
+    return sendError(response, 400, "Reset link is invalid or has expired");
+  }
+
+  user.password = await bcrypt.hash(password, 10);
+  user.resetPasswordToken = "";
+  user.resetPasswordExpires = undefined;
+  user.refreshToken = "";
+  await user.save();
+
+  return response.json({ message: "Password has been reset successfully" });
 }

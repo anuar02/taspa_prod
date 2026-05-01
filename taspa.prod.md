@@ -219,10 +219,10 @@ GET    /trending          — популярные теги
 - Кнопка "Кіру"
 
 ### Лента (`/feed`) — главный экран
-- Табы: **Барлығы** | **Танымал** | **Ұйымшан**
+- Табы: **Барлығы** | **Танымал** | **Ұсынылған**
     - Барлығы = все фото по дате
     - Танымал = isPopular=true
-    - Ұйымшан = фото от тех, на кого подписан
+    - Ұсынылған = фото от тех, на кого подписан
 - Masonry grid 2 колонки
 - Infinite scroll (IntersectionObserver)
 - Каждая карточка: фото, лайк, сохранение
@@ -400,7 +400,7 @@ Language: Kazakh (use text from section 5).
 ### Промпт 6 — Feed Page
 ```
 Create Next.js /feed page with:
-- Three tabs: Барлығы | Танымал | Ұйымшан
+- Three tabs: Барлығы | Танымал | Ұсынылған
 - Masonry grid 2 columns using CSS columns
 - PhotoCard component: image, like button, save button
 - Infinite scroll using IntersectionObserver

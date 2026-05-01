@@ -17,10 +17,22 @@ const allowedOrigins = env.clientUrl
   .map((origin) => origin.trim())
   .filter(Boolean);
 
+function isAllowedOrigin(origin: string) {
+  if (allowedOrigins.includes(origin)) {
+    return true;
+  }
+
+  if (env.nodeEnv !== "production") {
+    return /^https?:\/\/(localhost|127\.0\.0\.1):\d+$/.test(origin);
+  }
+
+  return false;
+}
+
 app.use(
   cors({
     origin(origin, callback) {
-      if (!origin || allowedOrigins.length === 0 || allowedOrigins.includes(origin)) {
+      if (!origin || allowedOrigins.length === 0 || isAllowedOrigin(origin)) {
         return callback(null, true);
       }
 

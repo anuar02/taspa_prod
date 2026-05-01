@@ -4,6 +4,7 @@ import { Types } from "mongoose";
 import { NotificationModel } from "../models/Notification.model.js";
 import { PhotoCategory, PhotoModel } from "../models/Photo.model.js";
 import { UserModel } from "../models/User.model.js";
+import { CommentModel } from "../models/Comment.model.js";
 import { emitToUser } from "../services/socket.service.js";
 import { uploadImage } from "../services/cloudinary.service.js";
 import { sendError } from "../utils/http.js";
@@ -111,6 +112,7 @@ export async function deletePhoto(request: Request, response: Response) {
   }
 
   await photo.deleteOne();
+  await CommentModel.deleteMany({ photo: photo._id });
   await UserModel.findByIdAndUpdate(request.user.id, { $inc: { postsCount: -1 } });
 
   return response.status(204).send();

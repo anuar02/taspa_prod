@@ -2,21 +2,31 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Heart, MapPin, Bookmark, Lock } from "lucide-react";
-import { useState } from "react";
+import { Bookmark, Heart, Lock, MapPin, MessageCircle } from "lucide-react";
+import { useEffect, useState } from "react";
 
 import { Photo } from "@/lib/types";
 import { api } from "@/lib/api";
 import { useAuthStore } from "@/store/authStore";
 import { useSavedStore } from "@/store/savedStore";
+import { useFeedStore } from "@/store/feedStore";
 
 export function PhotoCard({ photo, priority = false }: { photo: Photo; priority?: boolean }) {
   const user = useAuthStore((state) => state.user);
   const syncSavedItem = useSavedStore((state) => state.syncItem);
+  const updateFeedPhoto = useFeedStore((state) => state.updatePhoto);
   const [likesCount, setLikesCount] = useState(photo.likesCount);
+  const [commentsCount, setCommentsCount] = useState(photo.commentsCount ?? 0);
   const [liked, setLiked] = useState(Boolean(user?._id && photo.likes?.includes(user._id)));
   const [saved, setSaved] = useState(Boolean(user?._id && photo.saves?.includes(user._id)));
   const [pendingAction, setPendingAction] = useState<"like" | "save" | null>(null);
+
+  useEffect(() => {
+    setLikesCount(photo.likesCount);
+    setCommentsCount(photo.commentsCount ?? 0);
+    setLiked(Boolean(user?._id && photo.likes?.includes(user._id)));
+    setSaved(Boolean(user?._id && photo.saves?.includes(user._id)));
+  }, [photo.commentsCount, photo.likes, photo.likesCount, photo.saves, user?._id]);
 
   async function handleLike() {
     if (!user?._id || pendingAction) return;
@@ -28,6 +38,15 @@ export function PhotoCard({ photo, priority = false }: { photo: Photo; priority?
       const { data } = await api.post(`/photos/${photo._id}/like`);
       setLiked(data.liked);
       setLikesCount(data.likesCount);
+      updateFeedPhoto(photo._id, (item) => ({
+        ...item,
+        likesCount: data.likesCount,
+        likes: user?._id
+          ? data.liked
+            ? [...(item.likes ?? []).filter((id) => id !== user._id), user._id]
+            : (item.likes ?? []).filter((id) => id !== user._id)
+          : item.likes
+      }));
     } catch {
       setLiked(!nextLiked);
       setLikesCount((c) => c + (nextLiked ? -1 : 1));
@@ -52,14 +71,18 @@ export function PhotoCard({ photo, priority = false }: { photo: Photo; priority?
     try {
       const { data } = await api.post(`/photos/${photo._id}/save`);
       const resolvedSaved = Boolean(data.saved);
+      const resolvedPhoto = {
+        ...photo,
+        saves: resolvedSaved ? [...savesWithoutViewer, user._id] : savesWithoutViewer
+      };
       setSaved(resolvedSaved);
-      syncSavedItem(
-        {
-          ...photo,
-          saves: resolvedSaved ? [...savesWithoutViewer, user._id] : savesWithoutViewer
-        },
-        resolvedSaved
-      );
+      syncSavedItem(resolvedPhoto, resolvedSaved);
+      updateFeedPhoto(photo._id, (item) => ({
+        ...item,
+        saves: resolvedSaved
+          ? [...(item.saves ?? []).filter((id) => id !== user._id), user._id]
+          : (item.saves ?? []).filter((id) => id !== user._id)
+      }));
     } catch {
       setSaved(!nextSaved);
       syncSavedItem(
@@ -130,13 +153,20 @@ export function PhotoCard({ photo, priority = false }: { photo: Photo; priority?
             <Heart size={13} className={liked ? "fill-current" : ""} />
             {likesCount}
           </button>
+          <Link
+            href={`/photo/${photo._id}`}
+            className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium text-muted transition hover:bg-bg"
+          >
+            <MessageCircle size={13} />
+            {commentsCount}
+          </Link>
           <button
-            type="button"
-            onClick={handleSave}
-            disabled={pendingAction !== null}
-            className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition ${
-              saved ? "bg-primary/10 text-primary" : "text-muted hover:bg-bg"
-            }`}
+              type="button"
+              onClick={handleSave}
+              disabled={pendingAction !== null}
+              className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition ${
+                  saved ? "bg-primary/10 text-primary" : "text-muted hover:bg-bg"
+              }`}
           >
             <Bookmark size={13} className={saved ? "fill-current" : ""} />
             {saved ? "Сақталды" : "Сақтау"}

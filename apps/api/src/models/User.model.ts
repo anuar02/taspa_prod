@@ -13,6 +13,8 @@ export interface IUser {
   followersCount: number;
   followingCount: number;
   refreshToken?: string;
+  resetPasswordToken?: string;
+  resetPasswordExpires?: Date;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -32,7 +34,9 @@ const userSchema = new Schema<IUser, UserModel>(
     postsCount: { type: Number, default: 0 },
     followersCount: { type: Number, default: 0 },
     followingCount: { type: Number, default: 0 },
-    refreshToken: { type: String, default: "" }
+    refreshToken: { type: String, default: "" },
+    resetPasswordToken: { type: String, default: "" },
+    resetPasswordExpires: { type: Date }
   },
   { timestamps: true }
 );

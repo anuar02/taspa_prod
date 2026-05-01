@@ -13,6 +13,8 @@ type SavedStore = {
   setItems: (items: Photo[]) => void;
   markDirty: () => void;
   syncItem: (photo: Photo, saved: boolean) => void;
+  updateItem: (photoId: string, updater: (photo: Photo) => Photo) => void;
+  removeItem: (photoId: string) => void;
   isStale: () => boolean;
 };
 
@@ -38,6 +40,14 @@ export const useSavedStore = create<SavedStore>((set, get) => ({
         isDirty: false
       };
     }),
+  updateItem: (photoId, updater) =>
+    set((state) => ({
+      items: state.items.map((item) => (item._id === photoId ? updater(item) : item))
+    })),
+  removeItem: (photoId) =>
+    set((state) => ({
+      items: state.items.filter((item) => item._id !== photoId)
+    })),
   isStale: () => {
     const { fetchedAt, isDirty } = get();
     if (isDirty || fetchedAt === null) return true;

@@ -52,7 +52,7 @@ export function LoginForm() {
       <div className="space-y-1.5">
         <div className="flex items-center justify-between">
           <label className="block text-sm font-medium text-text">Құпиясөз</label>
-          <Link href="#" className="text-xs text-primary hover:underline">
+          <Link href="/forgot-password" className="text-xs text-primary hover:underline">
             Ұмыттыңыз ба?
           </Link>
         </div>

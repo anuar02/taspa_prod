@@ -33,6 +33,8 @@ type FeedStore = {
   isStale: (tab: FeedTabKey) => boolean;
   setTabItems: (tab: FeedTabKey, items: Photo[], page: number) => void;
   appendTabItems: (tab: FeedTabKey, items: Photo[], page: number) => void;
+  updatePhoto: (photoId: string, updater: (photo: Photo) => Photo) => void;
+  removePhoto: (photoId: string) => void;
 };
 
 export const useFeedStore = create<FeedStore>((set, get) => ({
@@ -70,4 +72,32 @@ export const useFeedStore = create<FeedStore>((set, get) => ({
         },
       },
     })),
+  updatePhoto: (photoId, updater) =>
+    set((state) => {
+      const nextTabs = Object.fromEntries(
+        Object.entries(state.tabs).map(([key, tab]) => [
+          key,
+          {
+            ...tab,
+            items: tab.items.map((item) => (item._id === photoId ? updater(item) : item)),
+          },
+        ])
+      ) as Record<FeedTabKey, TabState>;
+
+      return { tabs: nextTabs };
+    }),
+  removePhoto: (photoId) =>
+    set((state) => {
+      const nextTabs = Object.fromEntries(
+        Object.entries(state.tabs).map(([key, tab]) => [
+          key,
+          {
+            ...tab,
+            items: tab.items.filter((item) => item._id !== photoId),
+          },
+        ])
+      ) as Record<FeedTabKey, TabState>;
+
+      return { tabs: nextTabs };
+    }),
 }));

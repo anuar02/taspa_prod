@@ -11,7 +11,7 @@ import { useFeedStore, FeedTabKey } from "@/store/feedStore";
 const TABS = [
   { key: "all" as FeedTabKey, label: "Барлығы" },
   { key: "popular" as FeedTabKey, label: "Танымал" },
-  { key: "following" as FeedTabKey, label: "Ұйымшан" },
+  { key: "following" as FeedTabKey, label: "Ұсынылған" },
 ];
 
 export default function FeedPage() {
