@@ -80,6 +80,7 @@ export function CommentSection({
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [confirmingId, setConfirmingId] = useState<string | null>(null);
   const [error, setError] = useState("");
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -201,16 +202,36 @@ export function CommentSection({
                     <span className="text-[11px] text-muted">{timeAgo(comment.createdAt)}</span>
                   </div>
                   {canDelete ? (
-                    <button
-                      type="button"
-                      onClick={() => void handleDelete(comment._id)}
-                      disabled={deletingId === comment._id}
-                      className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-muted opacity-70 transition hover:bg-danger/10 hover:text-danger group-hover:opacity-100 disabled:opacity-30"
-                      aria-label="Пікірді өшіру"
-                      title="Пікірді өшіру"
-                    >
-                      <Trash2 size={13} />
-                    </button>
+                    confirmingId === comment._id ? (
+                      <div className="flex shrink-0 items-center gap-1">
+                        <button
+                          type="button"
+                          onClick={() => { setConfirmingId(null); void handleDelete(comment._id); }}
+                          disabled={deletingId === comment._id}
+                          className="rounded-lg bg-danger/10 px-2 py-1 text-[11px] font-semibold text-danger transition hover:bg-danger/20 disabled:opacity-40"
+                        >
+                          Иә
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setConfirmingId(null)}
+                          className="rounded-lg bg-border/40 px-2 py-1 text-[11px] font-semibold text-muted transition hover:bg-border/70"
+                        >
+                          Жоқ
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => setConfirmingId(comment._id)}
+                        disabled={deletingId === comment._id}
+                        className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-muted opacity-70 transition hover:bg-danger/10 hover:text-danger group-hover:opacity-100 disabled:opacity-30"
+                        aria-label="Пікірді өшіру"
+                        title="Пікірді өшіру"
+                      >
+                        <Trash2 size={13} />
+                      </button>
+                    )
                   ) : null}
                 </div>
                 <p className="mt-1 text-sm leading-relaxed text-text">{comment.text}</p>
