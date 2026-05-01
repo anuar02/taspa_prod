@@ -4,35 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="580c0d75-615b-44d8-8c68-024be5103102" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/public/design/WhatsApp Image 2026-05-01 at 12.24.54.jpeg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/public/design/WhatsApp Image 2026-05-01 at 12.25.10.jpeg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/public/images/airplane.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/public/images/envelope.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/api/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/apps/api/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/api/src/app.ts" beforeDir="false" afterPath="$PROJECT_DIR$/apps/api/src/app.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/api/src/config/env.ts" beforeDir="false" afterPath="$PROJECT_DIR$/apps/api/src/config/env.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/api/src/controllers/auth.controller.ts" beforeDir="false" afterPath="$PROJECT_DIR$/apps/api/src/controllers/auth.controller.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/api/src/controllers/comment.controller.ts" beforeDir="false" afterPath="$PROJECT_DIR$/apps/api/src/controllers/comment.controller.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/api/src/controllers/photo.controller.ts" beforeDir="false" afterPath="$PROJECT_DIR$/apps/api/src/controllers/photo.controller.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/api/src/models/User.model.ts" beforeDir="false" afterPath="$PROJECT_DIR$/apps/api/src/models/User.model.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/api/src/routes/auth.routes.ts" beforeDir="false" afterPath="$PROJECT_DIR$/apps/api/src/routes/auth.routes.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/api/src/routes/photo.routes.ts" beforeDir="false" afterPath="$PROJECT_DIR$/apps/api/src/routes/photo.routes.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/web/app/(main)/feed/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/apps/web/app/(main)/feed/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/web/app/(main)/photo/[id]/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/apps/web/app/(main)/photo/[id]/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/web/components/auth/LoginForm.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/apps/web/components/auth/LoginForm.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/web/components/auth/RegisterForm.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/apps/web/components/auth/RegisterForm.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/web/components/photo/CommentSection.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/apps/web/components/photo/CommentSection.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/web/components/photo/PhotoCard.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/apps/web/components/photo/PhotoCard.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/web/components/photo/PhotoDetail.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/apps/web/components/photo/PhotoDetail.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/web/store/feedStore.ts" beforeDir="false" afterPath="$PROJECT_DIR$/apps/web/store/feedStore.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/web/store/profileStore.ts" beforeDir="false" afterPath="$PROJECT_DIR$/apps/web/store/profileStore.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/web/store/savedStore.ts" beforeDir="false" afterPath="$PROJECT_DIR$/apps/web/store/savedStore.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/web/tsconfig.tsbuildinfo" beforeDir="false" afterPath="$PROJECT_DIR$/apps/web/tsconfig.tsbuildinfo" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/taspa.prod.md" beforeDir="false" afterPath="$PROJECT_DIR$/taspa.prod.md" afterDir="false" />
-    </list>
+    <list default="true" id="580c0d75-615b-44d8-8c68-024be5103102" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -121,7 +93,7 @@
       <workItem from="1776951125171" duration="13494000" />
       <workItem from="1777060314196" duration="6257000" />
       <workItem from="1777288457119" duration="9882000" />
-      <workItem from="1777626298791" duration="8654000" />
+      <workItem from="1777626298791" duration="9210000" />
     </task>
     <servers />
   </component>
