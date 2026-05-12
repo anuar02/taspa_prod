@@ -8,6 +8,7 @@
     "build": "tsc -p tsconfig.json",
     "start": "node dist/server.js",
     "seed": "tsx src/scripts/seed.ts",
+    "make:admin": "tsx src/scripts/makeAdmin.ts",
     "import:pexels": "tsx src/scripts/importPexels.ts",
     "import:public": "tsx src/scripts/importPublicImages.ts"
   },

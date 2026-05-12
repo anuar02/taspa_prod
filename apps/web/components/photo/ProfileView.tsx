@@ -7,6 +7,7 @@ import {
   Bookmark,
   Camera,
   Check,
+  FolderHeart,
   Grid3X3,
   Lock,
   LogOut,
@@ -438,6 +439,13 @@ export function ProfileView({ username }: { username: string }) {
               >
                 <Settings size={20} />
               </button>
+              <Link
+                href="/collections"
+                aria-label="Жинақтар"
+                className="rounded-full p-2 text-text transition hover:bg-border/60 active:scale-95"
+              >
+                <FolderHeart size={20} />
+              </Link>
               <button
                 type="button"
                 onClick={handleLogout}
@@ -576,14 +584,23 @@ export function ProfileView({ username }: { username: string }) {
                 <h1 className="text-xl font-light text-text">{profile.username}</h1>
                 {isOwn ? (
                   !editing ? (
-                    <button
-                      type="button"
-                      onClick={startEdit}
-                      aria-label="Баптаулар"
-                      className="rounded-full p-1.5 text-text transition hover:bg-border/60 active:scale-95"
-                    >
-                      <Settings size={18} />
-                    </button>
+                    <>
+                      <button
+                        type="button"
+                        onClick={startEdit}
+                        aria-label="Баптаулар"
+                        className="rounded-full p-1.5 text-text transition hover:bg-border/60 active:scale-95"
+                      >
+                        <Settings size={18} />
+                      </button>
+                      <Link
+                        href="/collections"
+                        aria-label="Жинақтар"
+                        className="rounded-full p-1.5 text-text transition hover:bg-border/60 active:scale-95"
+                      >
+                        <FolderHeart size={18} />
+                      </Link>
+                    </>
                   ) : (
                     <>
                       <button

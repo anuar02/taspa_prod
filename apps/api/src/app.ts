@@ -4,9 +4,12 @@ import express from "express";
 import helmet from "helmet";
 
 import { env } from "./config/env.js";
+import { adminRouter } from "./routes/admin.routes.js";
 import { authRouter } from "./routes/auth.routes.js";
+import { collectionRouter } from "./routes/collection.routes.js";
 import { commentRouter } from "./routes/comment.routes.js";
 import { photoRouter } from "./routes/photo.routes.js";
+import { reportRouter } from "./routes/report.routes.js";
 import { searchRouter } from "./routes/search.routes.js";
 import { userRouter } from "./routes/user.routes.js";
 
@@ -57,7 +60,10 @@ app.get("/api", (_request, response) => {
 });
 
 app.use("/api/auth", authRouter);
+app.use("/api/admin", adminRouter);
+app.use("/api/collections", collectionRouter);
 app.use("/api/photos", photoRouter);
 app.use("/api/comments", commentRouter);
+app.use("/api/reports", reportRouter);
 app.use("/api/users", userRouter);
 app.use("/api/search", searchRouter);

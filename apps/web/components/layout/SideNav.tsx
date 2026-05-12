@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Bookmark, ChevronUp, House, LogOut, PlusSquare, Search, User } from "lucide-react";
+import { Bookmark, ChevronUp, FolderHeart, House, LogOut, PlusSquare, Search, Shield, User } from "lucide-react";
 import clsx from "clsx";
 
 import { LogoutButton } from "@/components/layout/LogoutButton";
@@ -14,6 +14,7 @@ const items = [
   { href: "/search", label: "Іздеу", icon: Search },
   { href: "/upload", label: "Жүктеу", icon: PlusSquare },
   { href: "/saved", label: "Сақталған", icon: Bookmark },
+  { href: "/collections", label: "Жинақтар", icon: FolderHeart },
   { href: "/profile", label: "Профиль", icon: User }
 ];
 
@@ -27,6 +28,9 @@ export function SideNav() {
   const navItems = items.map((item) =>
     item.href === "/profile" ? { ...item, href: profileHref } : item
   );
+  const visibleNavItems = user?.role === "ADMIN"
+    ? [...navItems, { href: "/admin", label: "Админ", icon: Shield }]
+    : navItems;
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -62,7 +66,7 @@ export function SideNav() {
 
       {/* Nav */}
       <nav className="flex flex-col px-3">
-        {navItems.map(({ href, label, icon: Icon }) => {
+        {visibleNavItems.map(({ href, label, icon: Icon }) => {
           const active = pathname?.startsWith(href) ?? false;
           return (
             <Link

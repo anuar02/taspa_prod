@@ -4,6 +4,7 @@ export interface IUser {
   username: string;
   email: string;
   password: string;
+  role: "USER" | "ADMIN";
   displayName: string;
   bio: string;
   avatarUrl: string;
@@ -26,6 +27,7 @@ const userSchema = new Schema<IUser, UserModel>(
     username: { type: String, required: true, unique: true, trim: true, lowercase: true },
     email: { type: String, required: true, unique: true, trim: true, lowercase: true },
     password: { type: String, required: true },
+    role: { type: String, enum: ["USER", "ADMIN"], default: "USER", index: true },
     displayName: { type: String, required: true, trim: true },
     bio: { type: String, default: "" },
     avatarUrl: { type: String, default: "" },

@@ -6,6 +6,7 @@ export type AuthUser = {
   _id: string;
   username: string;
   email: string;
+  role?: "USER" | "ADMIN";
   displayName: string;
   bio?: string;
   avatarUrl?: string;

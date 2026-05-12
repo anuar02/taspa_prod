@@ -29,6 +29,28 @@ const searchModes = [
   { key: "tag", label: "Тег" }
 ] as const;
 
+const categoryOptions = [
+  { value: "all", label: "Барлық санат" },
+  { value: "NATURE", label: "Табиғат" },
+  { value: "PORTRAIT", label: "Портрет" },
+  { value: "CITY", label: "Қала" },
+  { value: "ART", label: "Өнер" },
+  { value: "FOOD", label: "Тағам" },
+  { value: "OTHER", label: "Басқа" }
+];
+
+const sortOptions = [
+  { value: "newest", label: "Жаңа алдымен" },
+  { value: "oldest", label: "Ескі алдымен" },
+  { value: "mostLiked", label: "Көп like" },
+  { value: "mostViewed", label: "Көп қаралым" }
+];
+
+const popularityOptions = [
+  { value: "all", label: "Барлығы" },
+  { value: "popular", label: "Тек танымал" }
+];
+
 function SearchMetaSkeleton() {
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
@@ -56,6 +78,9 @@ export default function SearchPage() {
   const { categories, trending, setMeta } = useSearchStore();
   const [query, setQuery] = useState("");
   const [mode, setMode] = useState<(typeof searchModes)[number]["key"]>("photo");
+  const [category, setCategory] = useState("all");
+  const [sort, setSort] = useState("newest");
+  const [popularity, setPopularity] = useState("all");
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [searching, setSearching] = useState(false);
@@ -92,7 +117,7 @@ export default function SearchPage() {
     const timer = window.setTimeout(async () => {
       try {
         const { data } = await api.get<{ items: Photo[] | UserProfile[] }>("/search", {
-          params: { q: query, type: mode, page: 1 },
+          params: { q: query, type: mode, page: 1, category, sort, popularity },
         });
 
         if (mode === "user") {
@@ -110,7 +135,7 @@ export default function SearchPage() {
     }, 250);
 
     return () => window.clearTimeout(timer);
-  }, [mode, query]);
+  }, [category, mode, popularity, query, sort]);
 
   return (
     <main>
@@ -140,6 +165,52 @@ export default function SearchPage() {
             </button>
           ))}
         </div>
+        {mode !== "user" ? (
+          <div className="mt-4 grid gap-3 sm:grid-cols-3">
+            <label className="block">
+              <span className="mb-1.5 block text-xs font-semibold uppercase text-muted">Санат</span>
+              <select
+                value={category}
+                onChange={(event) => setCategory(event.target.value)}
+                className="min-h-[44px] w-full rounded-xl border border-border bg-bg px-3 py-2 text-sm text-text outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/10"
+              >
+                {categoryOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="block">
+              <span className="mb-1.5 block text-xs font-semibold uppercase text-muted">Сұрыптау</span>
+              <select
+                value={sort}
+                onChange={(event) => setSort(event.target.value)}
+                className="min-h-[44px] w-full rounded-xl border border-border bg-bg px-3 py-2 text-sm text-text outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/10"
+              >
+                {sortOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="block">
+              <span className="mb-1.5 block text-xs font-semibold uppercase text-muted">Танымалдығы</span>
+              <select
+                value={popularity}
+                onChange={(event) => setPopularity(event.target.value)}
+                className="min-h-[44px] w-full rounded-xl border border-border bg-bg px-3 py-2 text-sm text-text outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/10"
+              >
+                {popularityOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
+        ) : null}
       </section>
 
       {!query ? (

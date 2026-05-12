@@ -8,7 +8,8 @@ import {
   popularPhotos,
   savedPhotos,
   toggleLike,
-  toggleSave
+  toggleSave,
+  updatePhoto
 } from "../controllers/photo.controller.js";
 import { authMiddleware, optionalAuthMiddleware } from "../middleware/auth.middleware.js";
 import { uploadMiddleware } from "../middleware/upload.middleware.js";
@@ -20,6 +21,7 @@ photoRouter.get("/saved", authMiddleware, savedPhotos);
 photoRouter.get("/popular", popularPhotos);
 photoRouter.get("/:id", optionalAuthMiddleware, getPhoto);
 photoRouter.post("/", authMiddleware, uploadMiddleware.single("image"), createPhoto);
+photoRouter.patch("/:id", authMiddleware, updatePhoto);
 photoRouter.delete("/:id", authMiddleware, deletePhoto);
 photoRouter.post("/:id/like", authMiddleware, toggleLike);
 photoRouter.post("/:id/save", authMiddleware, toggleSave);

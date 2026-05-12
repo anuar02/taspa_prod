@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import Link from "next/link";
-import { Bookmark, Search } from "lucide-react";
+import { Bookmark, FolderHeart, Search } from "lucide-react";
 
 import { TopBar } from "@/components/layout/TopBar";
 import { PhotoGrid } from "@/components/photo/PhotoGrid";
@@ -64,6 +64,13 @@ export default function SavedPage() {
             >
               <Search size={15} />
               Жаңа фото іздеу
+            </Link>
+            <Link
+              href="/collections"
+              className="inline-flex items-center justify-center gap-2 rounded-full border border-border bg-bg px-5 py-2.5 text-sm font-medium text-text transition hover:border-primary hover:text-primary"
+            >
+              <FolderHeart size={15} />
+              Жинақтар
             </Link>
           </div>
         )}

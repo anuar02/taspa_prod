@@ -4,14 +4,31 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="580c0d75-615b-44d8-8c68-024be5103102" name="Changes" comment="" />
+    <list default="true" id="580c0d75-615b-44d8-8c68-024be5103102" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/api/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/apps/api/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/api/src/app.ts" beforeDir="false" afterPath="$PROJECT_DIR$/apps/api/src/app.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/api/src/controllers/photo.controller.ts" beforeDir="false" afterPath="$PROJECT_DIR$/apps/api/src/controllers/photo.controller.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/api/src/controllers/search.controller.ts" beforeDir="false" afterPath="$PROJECT_DIR$/apps/api/src/controllers/search.controller.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/api/src/models/User.model.ts" beforeDir="false" afterPath="$PROJECT_DIR$/apps/api/src/models/User.model.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/api/src/routes/photo.routes.ts" beforeDir="false" afterPath="$PROJECT_DIR$/apps/api/src/routes/photo.routes.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/api/src/scripts/seed.ts" beforeDir="false" afterPath="$PROJECT_DIR$/apps/api/src/scripts/seed.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/web/app/(main)/saved/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/apps/web/app/(main)/saved/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/web/app/(main)/search/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/apps/web/app/(main)/search/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/web/components/layout/BottomNav.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/apps/web/components/layout/BottomNav.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/web/components/layout/SideNav.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/apps/web/components/layout/SideNav.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/web/components/photo/PhotoDetail.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/apps/web/components/photo/PhotoDetail.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/web/components/photo/ProfileView.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/apps/web/components/photo/ProfileView.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/web/lib/types.ts" beforeDir="false" afterPath="$PROJECT_DIR$/apps/web/lib/types.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/web/store/authStore.ts" beforeDir="false" afterPath="$PROJECT_DIR$/apps/web/store/authStore.ts" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="EmbeddingIndexingInfo">
-    <option name="cachedIndexableFilesCount" value="157" />
+    <option name="cachedIndexableFilesCount" value="323" />
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -40,29 +57,29 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RunOnceActivity.MCP Project settings loaded": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
-    "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
-    "git-widget-placeholder": "main",
-    "javascript.preferred.runtime.type.id": "node",
-    "junie.onboarding.icon.badge.shown": "true",
-    "last_opened_file_path": "/Users/dilnazzaksylykova/WebstormProjects/untitled3/public/design",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "to.speed.mode.migration.done": "true",
-    "ts.external.directory.path": "/Users/dilnazzaksylykova/WebstormProjects/untitled3/node_modules/typescript/lib",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.MCP Project settings loaded&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
+    &quot;com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;javascript.preferred.runtime.type.id&quot;: &quot;node&quot;,
+    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/Users/dilnazzaksylykova/WebstormProjects/untitled3/public/design&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;to.speed.mode.migration.done&quot;: &quot;true&quot;,
+    &quot;ts.external.directory.path&quot;: &quot;/Users/dilnazzaksylykova/WebstormProjects/untitled3/node_modules/typescript/lib&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/public/design" />
@@ -93,7 +110,9 @@
       <workItem from="1776951125171" duration="13494000" />
       <workItem from="1777060314196" duration="6257000" />
       <workItem from="1777288457119" duration="9882000" />
-      <workItem from="1777626298791" duration="9210000" />
+      <workItem from="1777626298791" duration="10656000" />
+      <workItem from="1778004411298" duration="8118000" />
+      <workItem from="1778487285375" duration="3592000" />
     </task>
     <servers />
   </component>

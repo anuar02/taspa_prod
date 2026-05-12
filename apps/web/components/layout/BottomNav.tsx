@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Bookmark, House, PlusSquare, Search, User } from "lucide-react";
+import { Bookmark, House, PlusSquare, Search, Shield, User } from "lucide-react";
 import clsx from "clsx";
 
 import { useAuthStore } from "@/store/authStore";
@@ -23,11 +23,14 @@ export function BottomNav() {
   const items = baseItems.map((item) =>
     item.href === "/profile" ? { ...item, href: profileHref } : item
   );
+  const visibleItems = user?.role === "ADMIN"
+    ? [...items.slice(0, 4), { href: "/admin", label: "Админ", icon: Shield }, items[4]]
+    : items;
 
   return (
-    <div className="fixed bottom-4 left-1/2 z-30 w-[min(92vw,420px)] -translate-x-1/2 lg:hidden">
+    <div className="fixed bottom-4 left-1/2 z-30 w-[min(94vw,480px)] -translate-x-1/2 lg:hidden">
       <nav className="flex items-center justify-between rounded-full border border-white/60 bg-white/90 px-4 py-3 shadow-card backdrop-blur">
-        {items.map(({ href, label, icon: Icon }) => {
+        {visibleItems.map(({ href, label, icon: Icon }) => {
           const active = pathname?.startsWith(href) ?? false;
 
           return (

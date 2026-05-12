@@ -126,9 +126,10 @@ async function run() {
 
   const password = await bcrypt.hash("password123", 10);
   const users = await UserModel.create(
-    demoUsers.map((user) => ({
+    demoUsers.map((user, index) => ({
       ...user,
-      password
+      password,
+      role: index === 0 ? "ADMIN" : "USER"
     }))
   );
 

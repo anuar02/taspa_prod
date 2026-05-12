@@ -48,6 +48,9 @@ function uniquePexelsById(photos: PexelsPhoto[]) {
 export async function search(request: Request, response: Response) {
   const q = String(request.query.q ?? "").trim();
   const type = String(request.query.type ?? "photo");
+  const category = String(request.query.category ?? "all").toUpperCase();
+  const sort = String(request.query.sort ?? "newest");
+  const popularity = String(request.query.popularity ?? "all");
   const page = Number(request.query.page ?? 1);
   const limit = 12;
 
@@ -69,9 +72,31 @@ export async function search(request: Request, response: Response) {
     return response.json({ items: users });
   }
 
+  const photoQuery: Record<string, unknown> = {};
+
+  if (["NATURE", "PORTRAIT", "CITY", "ART", "FOOD", "OTHER"].includes(category)) {
+    photoQuery.category = category;
+  }
+
+  if (popularity === "popular") {
+    photoQuery.isPopular = true;
+  }
+
+  const sortOptions: Record<string, Record<string, 1 | -1>> = {
+    newest: { createdAt: -1 },
+    oldest: { createdAt: 1 },
+    mostLiked: { likesCount: -1, createdAt: -1 },
+    mostViewed: { views: -1, createdAt: -1 }
+  };
+
   if (type === "tag") {
-    const photos = await PhotoModel.find({ tags: { $regex: q, $options: "i" } })
+    const photos = await PhotoModel.find({
+      ...photoQuery,
+      tags: { $regex: q, $options: "i" },
+      isPrivate: { $ne: true }
+    })
       .populate("author", "username displayName avatarUrl")
+      .sort(sortOptions[sort] ?? sortOptions.newest)
       .skip((page - 1) * limit)
       .limit(limit);
 
@@ -89,8 +114,9 @@ export async function search(request: Request, response: Response) {
     photoFilters.push({ category: categoryKey });
   }
 
-  const photos = await PhotoModel.find({ $or: photoFilters })
+  const photos = await PhotoModel.find({ ...photoQuery, $or: photoFilters, isPrivate: { $ne: true } })
     .populate("author", "username displayName avatarUrl")
+    .sort(sortOptions[sort] ?? sortOptions.newest)
     .skip((page - 1) * limit)
     .limit(limit);
 

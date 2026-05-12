@@ -100,6 +100,55 @@ export async function createPhoto(request: Request, response: Response) {
   return response.status(201).json({ item: photo });
 }
 
+export async function updatePhoto(request: Request, response: Response) {
+  const photo = await PhotoModel.findById(request.params.id);
+
+  if (!photo) {
+    return sendError(response, 404, "Photo not found");
+  }
+
+  if (photo.author.toString() !== request.user?.id) {
+    return sendError(response, 403, "Forbidden");
+  }
+
+  const updates: Partial<{
+    caption: string;
+    tags: string[];
+    category: PhotoCategory;
+    location: string;
+    isPrivate: boolean;
+  }> = {};
+
+  if (request.body.caption !== undefined) {
+    updates.caption = String(request.body.caption).trim();
+  }
+
+  if (request.body.tags !== undefined) {
+    updates.tags = toStringArray(request.body.tags);
+  }
+
+  if (request.body.category !== undefined) {
+    const category = String(request.body.category).toUpperCase();
+    if (!["NATURE", "PORTRAIT", "CITY", "ART", "FOOD", "OTHER"].includes(category)) {
+      return sendError(response, 400, "Invalid category");
+    }
+    updates.category = category as PhotoCategory;
+  }
+
+  if (request.body.location !== undefined) {
+    updates.location = String(request.body.location).trim();
+  }
+
+  if (request.body.isPrivate !== undefined) {
+    updates.isPrivate = request.body.isPrivate === true || request.body.isPrivate === "true";
+  }
+
+  const updatedPhoto = await PhotoModel.findByIdAndUpdate(photo._id, updates, { new: true })
+    .populate("author", "username displayName avatarUrl");
+
+  return response.json({ item: updatedPhoto });
+}
+
 export async function deletePhoto(request: Request, response: Response) {
   const photo = await PhotoModel.findById(request.params.id);
 
