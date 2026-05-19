@@ -46,6 +46,10 @@ export function ForgotPasswordForm() {
   }
 
   function errorFrom(err: unknown) {
+    if (axios.isAxiosError(err) && err.code === "ECONNABORTED") {
+      return "Сұраныс тым ұзақ орындалды. Кейінірек қайталап көріңіз";
+    }
+
     return axios.isAxiosError(err) ? err.response?.data?.message ?? "Қате орын алды" : "Қате орын алды";
   }
 
@@ -54,7 +58,7 @@ export function ForgotPasswordForm() {
     setLoading(true);
     setError("");
     try {
-      const { data } = await api.post("/auth/forgot-password", { email });
+      const { data } = await api.post("/auth/forgot-password", { email }, { timeout: 20_000 });
       // dev-only: backend returns the code when SMTP fails
       if (data.devResetCode) {
         setOtp(String(data.devResetCode).split(""));

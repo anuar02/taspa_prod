@@ -166,9 +166,10 @@ export async function forgotPassword(request: Request, response: Response) {
   try {
     await sendResetCode(user.email, code);
   } catch (error) {
+    console.error("[forgot-password] SMTP error:", error);
+
     if (env.nodeEnv !== "production") {
       // Keep the token so devResetCode can still be verified
-      console.error("[forgot-password] SMTP error:", (error as Error).message);
       console.info(`[forgot-password] Dev code for ${user.email}: ${code}`);
       return response.json({ message: "ok", devResetCode: code });
     }
