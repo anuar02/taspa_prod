@@ -11,6 +11,22 @@ function cleanEnv(value?: string) {
   return (value ?? "").trim();
 }
 
+function cleanBoolean(value?: string) {
+  const normalized = cleanEnv(value).toLowerCase();
+
+  if (["1", "true", "yes"].includes(normalized)) {
+    return true;
+  }
+
+  if (["0", "false", "no"].includes(normalized)) {
+    return false;
+  }
+
+  return undefined;
+}
+
+const smtpPort = Number(process.env.SMTP_PORT ?? 587);
+
 export const env = {
   port: Number(process.env.PORT ?? 4000),
   nodeEnv: cleanEnv(process.env.NODE_ENV) || "development",
@@ -25,7 +41,8 @@ export const env = {
   clientUrl: cleanEnv(process.env.CLIENT_URL) || "http://localhost:3000",
   pexelsApiKey: cleanEnv(process.env.PEXELS_API_KEY),
   smtpHost: cleanEnv(process.env.SMTP_HOST) || "smtp.gmail.com",
-  smtpPort: Number(process.env.SMTP_PORT ?? 587),
+  smtpPort,
+  smtpSecure: cleanBoolean(process.env.SMTP_SECURE) ?? smtpPort === 465,
   smtpUser: cleanEnv(process.env.SMTP_USER),
   smtpPass: cleanEnv(process.env.SMTP_PASS),
   smtpFrom: cleanEnv(process.env.SMTP_FROM)

@@ -4,7 +4,10 @@ import { env } from "../config/env.js";
 const transporter = nodemailer.createTransport({
   host: env.smtpHost,
   port: env.smtpPort,
-  secure: false,
+  secure: env.smtpSecure,
+  connectionTimeout: 10_000,
+  greetingTimeout: 10_000,
+  socketTimeout: 15_000,
   auth: {
     user: env.smtpUser,
     pass: env.smtpPass
