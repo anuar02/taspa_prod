@@ -4,6 +4,7 @@ import express from "express";
 import helmet from "helmet";
 
 import { env } from "./config/env.js";
+import { aiRouter } from "./routes/ai.routes.js";
 import { adminRouter } from "./routes/admin.routes.js";
 import { authRouter } from "./routes/auth.routes.js";
 import { collectionRouter } from "./routes/collection.routes.js";
@@ -60,6 +61,7 @@ app.get("/api", (_request, response) => {
 });
 
 app.use("/api/auth", authRouter);
+app.use("/api/ai", aiRouter);
 app.use("/api/admin", adminRouter);
 app.use("/api/collections", collectionRouter);
 app.use("/api/photos", photoRouter);

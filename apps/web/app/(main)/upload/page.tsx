@@ -12,6 +12,7 @@ import {
   Images,
   Lock,
   MapPin,
+  Sparkles,
   SwitchCamera,
   Tags,
   Trash2,
@@ -44,6 +45,12 @@ const MAX_FILE_SIZE = 10 * 1024 * 1024;
 
 type StepId = (typeof steps)[number]["id"];
 
+interface AiPhotoSuggestions {
+  caption: string;
+  tags: string[];
+  category: (typeof categories)[number]["key"];
+}
+
 function normalizeTags(value: string) {
   return value
     .split(",")
@@ -69,6 +76,9 @@ export default function UploadPage() {
   const [isPrivate, setIsPrivate] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [analyzing, setAnalyzing] = useState(false);
+  const [aiError, setAiError] = useState("");
+  const [aiApplied, setAiApplied] = useState(false);
   const [error, setError] = useState("");
   const [isMobile, setIsMobile] = useState(false);
   const [facing, setFacing] = useState<"environment" | "user">("environment");
@@ -125,6 +135,8 @@ export default function UploadPage() {
     setFile(null);
     setPreview("");
     setStep(1);
+    setAiError("");
+    setAiApplied(false);
     if (fileInputRef.current) fileInputRef.current.value = "";
   }
 
@@ -160,6 +172,8 @@ export default function UploadPage() {
     }
 
     setError("");
+    setAiError("");
+    setAiApplied(false);
     if (preview) URL.revokeObjectURL(preview);
     setFile(nextFile);
     setPreview(URL.createObjectURL(nextFile));
@@ -191,6 +205,32 @@ export default function UploadPage() {
     const normalized = tag.startsWith("#") ? tag : `#${tag}`;
     if (parsedTags.includes(normalized)) return;
     setTags((current) => (current.trim() ? `${current}, ${normalized}` : normalized));
+  }
+
+  async function handleAiSuggestions() {
+    if (!file || analyzing) return;
+
+    try {
+      setAnalyzing(true);
+      setAiError("");
+      setAiApplied(false);
+
+      const formData = new FormData();
+      formData.append("image", file);
+
+      const { data } = await api.post<{ item: AiPhotoSuggestions }>("/ai/photo-suggestions", formData, {
+        headers: { "Content-Type": "multipart/form-data" }
+      });
+
+      setCaption(data.item.caption);
+      setTags(data.item.tags.join(", "));
+      setCategory(data.item.category);
+      setAiApplied(true);
+    } catch {
+      setAiError("ЖИ ұсынысын алу мүмкін болмады. API кілті мен байланысты тексеріңіз.");
+    } finally {
+      setAnalyzing(false);
+    }
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -493,12 +533,41 @@ export default function UploadPage() {
                 </div>
               </div>
 
-              <div className="rounded-[28px] bg-bg p-5">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-primary">Қысқаша кеңес</p>
-                <div className="mt-4 space-y-3 text-sm text-muted">
-                  <div className="rounded-2xl bg-white px-4 py-3">Сипаттаманы 1-3 сөйлеммен ұстаңыз.</div>
-                  <div className="rounded-2xl bg-white px-4 py-3">3-5 нақты тег іздеуді жақсартады.</div>
-                  <div className="rounded-2xl bg-white px-4 py-3">Категория карточканың қабылдануын күшейтеді.</div>
+              <div className="space-y-4">
+                <div className="rounded-[28px] border border-primary/15 bg-primary/5 p-5">
+                  <div className="flex items-center gap-2 text-primary">
+                    <Sparkles size={16} />
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.24em]">ЖИ көмекшісі</p>
+                  </div>
+                  <p className="mt-3 text-sm leading-6 text-muted">
+                    Суретке қарай қазақша сипаттама, тегтер және категория ұсынады. Нәтижені жарияламас бұрын өзгерте аласыз.
+                  </p>
+                  <Button
+                    type="button"
+                    className="mt-4 w-full gap-2"
+                    onClick={handleAiSuggestions}
+                    disabled={analyzing}
+                  >
+                    <Sparkles size={16} />
+                    {analyzing ? "Талдап жатыр..." : "ЖИ-мен толтыру"}
+                  </Button>
+                  {aiApplied && (
+                    <p className="mt-3 rounded-2xl bg-white px-3 py-2 text-xs font-medium text-primary">
+                      Ұсыныстар өрістерге енгізілді. Қажет болса өңдеңіз.
+                    </p>
+                  )}
+                  {aiError && (
+                    <p className="mt-3 rounded-2xl bg-danger/5 px-3 py-2 text-xs text-danger">{aiError}</p>
+                  )}
+                </div>
+
+                <div className="rounded-[28px] bg-bg p-5">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-primary">Қысқаша кеңес</p>
+                  <div className="mt-4 space-y-3 text-sm text-muted">
+                    <div className="rounded-2xl bg-white px-4 py-3">Сипаттаманы 1-3 сөйлеммен ұстаңыз.</div>
+                    <div className="rounded-2xl bg-white px-4 py-3">3-5 нақты тег іздеуді жақсартады.</div>
+                    <div className="rounded-2xl bg-white px-4 py-3">Категория карточканың қабылдануын күшейтеді.</div>
+                  </div>
                 </div>
               </div>
             </div>

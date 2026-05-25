@@ -45,5 +45,7 @@ export const env = {
   smtpSecure: cleanBoolean(process.env.SMTP_SECURE) ?? smtpPort === 465,
   smtpUser: cleanEnv(process.env.SMTP_USER),
   smtpPass: cleanEnv(process.env.SMTP_PASS),
-  smtpFrom: cleanEnv(process.env.SMTP_FROM)
+  smtpFrom: cleanEnv(process.env.SMTP_FROM),
+  openaiApiKey: cleanEnv(process.env.OPENAI_API_KEY),
+  openaiModel: cleanEnv(process.env.OPENAI_MODEL) || "gpt-5.4-mini"
 };

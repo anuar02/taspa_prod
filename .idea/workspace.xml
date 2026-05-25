@@ -4,9 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="580c0d75-615b-44d8-8c68-024be5103102" name="Changes" comment="">
+    <list default="true" id="580c0d75-615b-44d8-8c68-024be5103102" name="Changes" comment="added changes">
+      <change beforePath="$PROJECT_DIR$/.env.example" beforeDir="false" afterPath="$PROJECT_DIR$/.env.example" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/web/components/auth/ForgotPasswordForm.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/apps/web/components/auth/ForgotPasswordForm.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/api/src/app.ts" beforeDir="false" afterPath="$PROJECT_DIR$/apps/api/src/app.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/api/src/config/env.ts" beforeDir="false" afterPath="$PROJECT_DIR$/apps/api/src/config/env.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/web/app/(main)/upload/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/apps/web/app/(main)/upload/page.tsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -101,7 +104,8 @@
       <workItem from="1778487285375" duration="3592000" />
       <workItem from="1778574793788" duration="351000" />
       <workItem from="1778575187506" duration="12000" />
-      <workItem from="1779166893710" duration="1124000" />
+      <workItem from="1779166893710" duration="1893000" />
+      <workItem from="1779702025266" duration="1407000" />
     </task>
     <servers />
   </component>
@@ -130,5 +134,9 @@
         </entry>
       </map>
     </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="added changes" />
+    <option name="LAST_COMMIT_MESSAGE" value="added changes" />
   </component>
 </project>
